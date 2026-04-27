@@ -50,3 +50,23 @@ Domínios configurados neste pacote:
    - Senha: `admin`
 
 9. Troque a senha imediatamente após o primeiro acesso.
+
+
+## Correção aplicada em 27/04/2026 — erro Debian Buster / node:14
+
+Se o EasyPanel retornar erro semelhante a:
+
+```text
+E: The repository 'http://deb.debian.org/debian buster Release' does not have a Release file.
+```
+
+isso acontece porque o Dockerfile antigo usava `FROM node:14`, que puxava Debian Buster. Esta versão corrige o build trocando:
+
+- backend: `node:14` para `node:18-bullseye`;
+- frontend: `node:14-alpine` para `node:18-alpine`;
+- instalação do Google Chrome usando `/etc/apt/keyrings`, sem `apt-key`;
+- `npm install --legacy-peer-deps` para evitar conflito de dependências antigas;
+- remoção do atributo `version` no Compose, que era apenas aviso;
+- `dockerize` com timeout de 120s aguardando o MySQL.
+
+Após subir esta versão para o GitHub, faça novo deploy no EasyPanel com **Build without cache** quando disponível.
