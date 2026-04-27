@@ -77,10 +77,10 @@ class ScheduledMessage extends Model<ScheduledMessage> {
     this.setDataValue("mediaUrl", value);
   }
 
-  @Column
+  @Column(DataType.STRING)
   mediaName: string | null;
 
-  @Column
+  @Column(DataType.STRING)
   mediaType: string | null;
 
   @Column(DataType.DATE(6))
