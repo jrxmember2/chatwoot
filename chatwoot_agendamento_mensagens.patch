@@ -1,0 +1,533 @@
+--- a/app/controllers/api/v1/accounts/conversations/scheduled_messages_controller.rb
++++ b/app/controllers/api/v1/accounts/conversations/scheduled_messages_controller.rb
+@@ -0,0 +1,57 @@
++class Api::V1::Accounts::Conversations::ScheduledMessagesController < Api::V1::Accounts::Conversations::BaseController
++  def index
++    scheduled_messages = ScheduledMessage.where(conversation: @conversation).pending.order(:scheduled_at)
++    render json: { payload: scheduled_messages.as_json(only: %i[id content scheduled_at status created_at]) }
++  end
++
++  def create
++    validate_schedule_payload!
++
++    scheduled_message = ScheduledMessage.create!(
++      account: Current.account,
++      inbox: @conversation.inbox,
++      conversation: @conversation,
++      sender: Current.user,
++      content: permitted_message_params[:content],
++      scheduled_at: parsed_scheduled_at,
++      message_params: message_payload
++    )
++
++    scheduled_message.enqueue_delivery!
++
++    render json: { payload: scheduled_message.as_json(only: %i[id content scheduled_at status created_at]) }, status: :created
++  rescue StandardError => e
++    render_could_not_create_error(e.message)
++  end
++
++  def destroy
++    scheduled_message = ScheduledMessage.where(conversation: @conversation).pending.find(params[:id])
++    scheduled_message.cancelled!
++    head :ok
++  end
++
++  private
++
++  def validate_schedule_payload!
++    raise StandardError, 'Não foi possível identificar o usuário atual.' if Current.user.blank?
++    raise StandardError, 'Informe a data e hora do agendamento.' if parsed_scheduled_at.blank?
++    raise StandardError, 'A data e hora do agendamento deve ser futura.' unless parsed_scheduled_at.future?
++    raise StandardError, 'Informe o conteúdo da mensagem.' if permitted_message_params[:content].blank?
++    raise StandardError, 'O agendamento aceita apenas mensagens de texto por enquanto.' if params[:attachments].present?
++  end
++
++  def parsed_scheduled_at
++    @parsed_scheduled_at ||= Time.zone.parse(params[:scheduled_at].to_s)
++  rescue ArgumentError, TypeError
++    nil
++  end
++
++  def message_payload
++    permitted_message_params.to_h.compact
++  end
++
++  def permitted_message_params
++    params.permit(:content, :private, :content_type, :cc_emails, :bcc_emails, :to_emails, :scheduled_at, content_attributes: {}, template_params: {})
++          .except(:scheduled_at)
++  end
++end
+
+--- a/app/javascript/dashboard/api/inbox/message.js
++++ b/app/javascript/dashboard/api/inbox/message.js
+@@ -12,6 +12,7 @@
+   bccEmails = '',
+   toEmails = '',
+   templateParams,
++  scheduledAt,
+ }) => {
+   let payload;
+   if (files && files.length !== 0) {
+@@ -43,6 +44,7 @@
+       bcc_emails: bccEmails,
+       to_emails: toEmails,
+       template_params: templateParams,
++      scheduled_at: scheduledAt,
+     };
+   }
+   return payload;
+@@ -82,6 +84,33 @@
+     });
+   }
+ 
++  schedule({
++    conversationId,
++    message,
++    private: isPrivate,
++    contentAttributes,
++    ccEmails = '',
++    bccEmails = '',
++    toEmails = '',
++    templateParams,
++    scheduledAt,
++  }) {
++    return axios({
++      method: 'post',
++      url: `${this.url}/${conversationId}/scheduled_messages`,
++      data: buildCreatePayload({
++        message,
++        isPrivate,
++        contentAttributes,
++        ccEmails,
++        bccEmails,
++        toEmails,
++        templateParams,
++        scheduledAt,
++      }),
++    });
++  }
++
+   delete(conversationID, messageId) {
+     return axios.delete(`${this.url}/${conversationID}/messages/${messageId}`);
+   }
+
+--- a/app/javascript/dashboard/components/widgets/WootWriter/ReplyBottomPanel.vue
++++ b/app/javascript/dashboard/components/widgets/WootWriter/ReplyBottomPanel.vue
+@@ -26,6 +26,10 @@
+       type: Function,
+       default: () => {},
+     },
++    onSchedule: {
++      type: Function,
++      default: () => {},
++    },
+     sendButtonText: {
+       type: String,
+       default: '',
+@@ -74,6 +78,14 @@
+       default: '',
+     },
+     isSendDisabled: {
++      type: Boolean,
++      default: false,
++    },
++    isScheduleDisabled: {
++      type: Boolean,
++      default: false,
++    },
++    showScheduleButton: {
+       type: Boolean,
+       default: false,
+     },
+@@ -404,7 +416,18 @@
+         @click="toggleInsertArticle"
+       />
+     </div>
+-    <div class="right-wrap">
++    <div class="right-wrap flex items-center gap-2">
++      <NextButton
++        v-if="showScheduleButton"
++        v-tooltip.top-end="'Agendar mensagem'"
++        icon="i-ph-calendar-plus"
++        slate
++        faded
++        sm
++        :disabled="isScheduleDisabled"
++        class="flex-shrink-0"
++        @click="onSchedule"
++      />
+       <NextButton
+         :label="sendButtonText"
+         type="submit"
+
+--- a/app/javascript/dashboard/components/widgets/conversation/ReplyBox.vue
++++ b/app/javascript/dashboard/components/widgets/conversation/ReplyBox.vue
+@@ -13,6 +13,7 @@
+ import ReplyEmailHead from './ReplyEmailHead.vue';
+ import ReplyBottomPanel from 'dashboard/components/widgets/WootWriter/ReplyBottomPanel.vue';
+ import CopilotReplyBottomPanel from 'dashboard/components/widgets/WootWriter/CopilotReplyBottomPanel.vue';
++import NextButton from 'dashboard/components-next/button/Button.vue';
+ import ArticleSearchPopover from 'dashboard/routes/dashboard/helpcenter/components/ArticleSearch/SearchPopover.vue';
+ import CopilotEditorSection from './CopilotEditorSection.vue';
+ import MessageSignatureMissingAlert from './MessageSignatureMissingAlert.vue';
+@@ -69,6 +70,7 @@
+     ReplyBoxBanner,
+     EmojiInput,
+     MessageSignatureMissingAlert,
++    NextButton,
+     ReplyBottomPanel,
+     ReplyEmailHead,
+     ReplyToMessage,
+@@ -125,6 +127,11 @@
+       doAutoSaveDraft: () => {},
+       showWhatsAppTemplatesModal: false,
+       showContentTemplatesModal: false,
++      showScheduleMessageModal: false,
++      scheduledDate: '',
++      scheduledTime: '',
++      isSchedulingMessage: false,
++      scheduleValidationError: '',
+       updateEditorSelectionWith: '',
+       undefinedVariableMessage: '',
+       showMentions: false,
+@@ -219,6 +226,18 @@
+       if (this.isATwitterInbox) return true;
+       if (this.hasAttachments || this.hasRecordedAudio) return false;
+ 
++      return (
++        this.isMessageEmpty ||
++        this.message.length === 0 ||
++        this.message.length > this.maxLength
++      );
++    },
++    showScheduleButton() {
++      return !this.isPrivate && !this.isEditorDisabled;
++    },
++    isScheduleButtonDisabled() {
++      if (this.isEditorDisabled || this.isPrivate) return true;
++      if (this.hasAttachments || this.hasRecordedAudio) return true;
+       return (
+         this.isMessageEmpty ||
+         this.message.length === 0 ||
+@@ -754,6 +773,103 @@
+     },
+     hideContentTemplatesModal() {
+       this.showContentTemplatesModal = false;
++    },
++    formatScheduleDate(date) {
++      const year = date.getFullYear();
++      const month = String(date.getMonth() + 1).padStart(2, '0');
++      const day = String(date.getDate()).padStart(2, '0');
++      return `${year}-${month}-${day}`;
++    },
++    formatScheduleTime(date) {
++      const hours = String(date.getHours()).padStart(2, '0');
++      const minutes = String(date.getMinutes()).padStart(2, '0');
++      return `${hours}:${minutes}`;
++    },
++    openScheduleMessageModal() {
++      if (this.isScheduleButtonDisabled) {
++        if (this.hasAttachments || this.hasRecordedAudio) {
++          useAlert('Por enquanto, o agendamento aceita apenas mensagens de texto.');
++        }
++        return;
++      }
++
++      const defaultDate = new Date();
++      defaultDate.setHours(defaultDate.getHours() + 1);
++      defaultDate.setMinutes(0, 0, 0);
++
++      this.scheduledDate = this.formatScheduleDate(defaultDate);
++      this.scheduledTime = this.formatScheduleTime(defaultDate);
++      this.scheduleValidationError = '';
++      this.showScheduleMessageModal = true;
++    },
++    closeScheduleMessageModal() {
++      if (this.isSchedulingMessage) return;
++      this.showScheduleMessageModal = false;
++      this.scheduleValidationError = '';
++    },
++    getScheduledAt() {
++      if (!this.scheduledDate || !this.scheduledTime) return null;
++      const scheduledAt = new Date(`${this.scheduledDate}T${this.scheduledTime}:00`);
++      if (Number.isNaN(scheduledAt.getTime())) return null;
++      return scheduledAt;
++    },
++    async onScheduleReply() {
++      const undefinedVariables = getUndefinedVariablesInMessage({
++        message: this.message,
++        variables: this.messageVariables,
++      });
++      if (undefinedVariables.length > 0) {
++        const undefinedVariablesCount =
++          undefinedVariables.length > 1 ? undefinedVariables.length : 1;
++        this.undefinedVariableMessage = this.$t(
++          'CONVERSATION.REPLYBOX.UNDEFINED_VARIABLES.MESSAGE',
++          {
++            undefinedVariablesCount,
++            undefinedVariables: undefinedVariables.join(', '),
++          }
++        );
++
++        const ok = await this.$refs.confirmDialog.showConfirmation();
++        if (!ok) return;
++      }
++
++      this.confirmOnScheduleReply();
++    },
++    async confirmOnScheduleReply() {
++      if (this.isScheduleButtonDisabled) return;
++
++      const scheduledAt = this.getScheduledAt();
++      if (!scheduledAt || scheduledAt <= new Date()) {
++        this.scheduleValidationError = 'Informe uma data e hora futuras.';
++        return;
++      }
++
++      this.isSchedulingMessage = true;
++      this.scheduleValidationError = '';
++
++      try {
++        const messagePayload = this.getMessagePayload(this.message);
++        await this.$store.dispatch('scheduleMessage', {
++          ...messagePayload,
++          scheduledAt: scheduledAt.toISOString(),
++        });
++
++        useAlert('Mensagem agendada com sucesso.');
++        if (!this.isPrivate) {
++          this.clearEmailField();
++        }
++        this.clearMessage();
++        this.hideEmojiPicker();
++        this.removeFromDraft();
++        this.closeScheduleMessageModal();
++      } catch (error) {
++        const errorMessage =
++          error?.response?.data?.error || 'Não foi possível agendar a mensagem.';
++        this.scheduleValidationError = errorMessage;
++        useAlert(errorMessage);
++      } finally {
++        this.isSchedulingMessage = false;
++      }
+     },
+     confirmOnSendReply() {
+       if (this.isReplyButtonDisabled) {
+@@ -1386,10 +1502,13 @@
+         :is-on-private-note="isOnPrivateNote"
+         :is-recording-audio="isRecordingAudio"
+         :is-send-disabled="isReplyButtonDisabled"
++        :is-schedule-disabled="isScheduleButtonDisabled"
++        :show-schedule-button="showScheduleButton"
+         :is-note="isPrivate"
+         :is-editor-disabled="isEditorDisabled"
+         :on-file-upload="onFileUpload"
+         :on-send="onSendReply"
++        :on-schedule="openScheduleMessageModal"
+         :conversation-type="conversationType"
+         :recording-audio-duration-text="recordingAudioDurationText"
+         :recording-audio-state="recordingAudioState"
+@@ -1428,6 +1547,69 @@
+       @cancel="hideContentTemplatesModal"
+     />
+ 
++    <div
++      v-if="showScheduleMessageModal"
++      class="fixed inset-0 z-50 flex items-center justify-center bg-modal-backdrop-light dark:bg-modal-backdrop-dark"
++      @click.self="closeScheduleMessageModal"
++    >
++      <form
++        class="w-[92vw] max-w-md rounded-xl border border-n-weak bg-n-solid-1 p-5 shadow-xl"
++        @submit.prevent="onScheduleReply"
++      >
++        <div class="mb-4">
++          <h3 class="text-lg font-semibold text-n-slate-12">
++            Agendar mensagem
++          </h3>
++          <p class="mt-1 text-sm text-n-slate-11">
++            Escolha a data e a hora em que a mensagem será enviada.
++          </p>
++        </div>
++
++        <label class="mb-1 block text-sm font-medium text-n-slate-12">
++          Data
++        </label>
++        <input
++          v-model="scheduledDate"
++          type="date"
++          class="mb-4 w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2 text-n-slate-12 outline-none"
++          required
++        />
++
++        <label class="mb-1 block text-sm font-medium text-n-slate-12">
++          Hora
++        </label>
++        <input
++          v-model="scheduledTime"
++          type="time"
++          class="mb-2 w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2 text-n-slate-12 outline-none"
++          required
++        />
++
++        <p v-if="scheduleValidationError" class="mt-2 text-sm text-n-ruby-9">
++          {{ scheduleValidationError }}
++        </p>
++
++        <div class="mt-5 flex justify-end gap-2">
++          <NextButton
++            type="button"
++            faded
++            slate
++            sm
++            label="Cancelar"
++            :disabled="isSchedulingMessage"
++            @click="closeScheduleMessageModal"
++          />
++          <NextButton
++            type="submit"
++            sm
++            color="blue"
++            label="Agendar"
++            :disabled="isSchedulingMessage"
++          />
++        </div>
++      </form>
++    </div>
++
+     <woot-confirm-modal
+       ref="confirmDialog"
+       :title="$t('CONVERSATION.REPLYBOX.UNDEFINED_VARIABLES.TITLE')"
+
+--- a/app/javascript/dashboard/store/modules/conversations/actions.js
++++ b/app/javascript/dashboard/store/modules/conversations/actions.js
+@@ -286,6 +286,10 @@
+     dispatch('sendMessageWithData', pendingMessage);
+   },
+ 
++  scheduleMessage: async (_, data) => {
++    await MessageApi.schedule(data);
++  },
++
+   sendMessageWithData: async ({ commit }, pendingMessage) => {
+     const { conversation_id: conversationId, id } = pendingMessage;
+     try {
+
+--- a/app/jobs/scheduled_messages/send_job.rb
++++ b/app/jobs/scheduled_messages/send_job.rb
+@@ -0,0 +1,46 @@
++module ScheduledMessages
++  class SendJob < ApplicationJob
++    queue_as :high
++
++    def perform(scheduled_message_id)
++      scheduled_message = ScheduledMessage.find(scheduled_message_id)
++      return unless scheduled_message.pending?
++
++      if scheduled_message.scheduled_at.future?
++        scheduled_message.enqueue_delivery!
++        return
++      end
++
++      scheduled_message.sending!
++      set_current_context(scheduled_message)
++
++      message = Messages::MessageBuilder.new(
++        scheduled_message.sender,
++        scheduled_message.conversation,
++        ActionController::Parameters.new(scheduled_message.message_params)
++      ).perform
++
++      scheduled_message.update!(
++        status: :sent,
++        sent_message: message,
++        sent_at: Time.current,
++        error_message: nil
++      )
++    rescue StandardError => e
++      scheduled_message&.update!(status: :failed, error_message: e.message)
++      raise e
++    ensure
++      Current.reset if defined?(Current)
++    end
++
++    private
++
++    def set_current_context(scheduled_message)
++      return unless defined?(Current)
++
++      Current.account = scheduled_message.account if Current.respond_to?(:account=)
++      Current.user = scheduled_message.sender if Current.respond_to?(:user=)
++      Current.executed_by = scheduled_message.sender if Current.respond_to?(:executed_by=)
++    end
++  end
++end
+
+--- a/app/models/scheduled_message.rb
++++ b/app/models/scheduled_message.rb
+@@ -0,0 +1,28 @@
++class ScheduledMessage < ApplicationRecord
++  belongs_to :account
++  belongs_to :inbox
++  belongs_to :conversation
++  belongs_to :sender, class_name: 'User'
++  belongs_to :sent_message, class_name: 'Message', optional: true
++
++  enum status: { pending: 0, sending: 1, sent: 2, failed: 3, cancelled: 4 }
++
++  validates :scheduled_at, presence: true
++  validates :message_params, presence: true
++  validate :scheduled_at_must_be_future, on: :create
++
++  scope :due, -> { pending.where('scheduled_at <= ?', Time.current) }
++
++  def enqueue_delivery!
++    ScheduledMessages::SendJob.set(wait_until: scheduled_at).perform_later(id)
++  end
++
++  private
++
++  def scheduled_at_must_be_future
++    return if scheduled_at.blank?
++    return if scheduled_at.future?
++
++    errors.add(:scheduled_at, 'deve ser uma data e hora futura')
++  end
++end
+
+--- a/config/routes.rb
++++ b/config/routes.rb
+@@ -140,6 +140,7 @@
+                   post :retry
+                 end
+               end
++              resources :scheduled_messages, only: [:index, :create, :destroy]
+               resources :assignments, only: [:create]
+               resources :labels, only: [:create, :index]
+               resource :participants, only: [:show, :create, :update, :destroy]
+
+--- a/db/migrate/20260427000000_create_scheduled_messages.rb
++++ b/db/migrate/20260427000000_create_scheduled_messages.rb
+@@ -0,0 +1,22 @@
++class CreateScheduledMessages < ActiveRecord::Migration[7.1]
++  def change
++    create_table :scheduled_messages do |t|
++      t.references :account, null: false, foreign_key: true
++      t.references :inbox, null: false, foreign_key: true
++      t.references :conversation, null: false, foreign_key: true
++      t.references :sender, null: false, foreign_key: { to_table: :users }
++      t.references :sent_message, foreign_key: { to_table: :messages }
++      t.text :content, null: false
++      t.jsonb :message_params, null: false, default: {}
++      t.datetime :scheduled_at, null: false
++      t.datetime :sent_at
++      t.integer :status, null: false, default: 0
++      t.text :error_message
++
++      t.timestamps
++    end
++
++    add_index :scheduled_messages, [:status, :scheduled_at]
++    add_index :scheduled_messages, [:conversation_id, :status]
++  end
++end
