@@ -91,30 +91,40 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.query as IndexQuery;
   const parsedTicketId = Number(ticketId);
+  const include = [
+    {
+      model: Contact,
+      as: "contact",
+      attributes: ["id", "name", "number"]
+    },
+    {
+      model: User,
+      as: "user",
+      attributes: ["id", "name"]
+    },
+    {
+      model: Ticket,
+      as: "ticket",
+      attributes: ["id", "contactId", "whatsappId"]
+    }
+  ];
 
-  const where = !ticketId || Number.isNaN(parsedTicketId) ? {} : { ticketId: parsedTicketId };
+  const order: Array<[string, string]> = [
+    ["scheduledAt", "ASC"],
+    ["id", "DESC"]
+  ];
 
-  const scheduledMessages = await ScheduledMessage.findAll({
-    where,
-    include: [
-      {
-        model: Contact,
-        as: "contact",
-        attributes: ["id", "name", "number"]
-      },
-      {
-        model: User,
-        as: "user",
-        attributes: ["id", "name"]
-      },
-      {
-        model: Ticket,
-        as: "ticket",
-        attributes: ["id", "contactId", "whatsappId"]
-      }
-    ],
-    order: [["scheduledAt", "ASC"], ["id", "DESC"]]
-  });
+  const scheduledMessages =
+    ticketId && !Number.isNaN(parsedTicketId)
+      ? await ScheduledMessage.findAll({
+          where: { ticketId: parsedTicketId },
+          include,
+          order
+        })
+      : await ScheduledMessage.findAll({
+          include,
+          order
+        });
 
   return res.status(200).json(scheduledMessages);
 };
