@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mariadb:10.6
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    environment:
+      MYSQL_DATABASE: whaticket
+      MYSQL_ROOT_PASSWORD: 58WYpT_xFbNG6ZrhDwX6baxElbPDV5INzk7flMJ6QXpG_wpgO-hP2NA02uwqdx_w
+      TZ: America/Sao_Paulo
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p58WYpT_xFbNG6ZrhDwX6baxElbPDV5INzk7flMJ6QXpG_wpgO-hP2NA02uwqdx_w"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    networks:
+      - whaticket
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: America/Sao_Paulo
+      DB_DIALECT: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASS: 58WYpT_xFbNG6ZrhDwX6baxElbPDV5INzk7flMJ6QXpG_wpgO-hP2NA02uwqdx_w
+      DB_NAME: whaticket
+      JWT_SECRET: SJ4MwaIMiAfzwjAslRr3Yxo8rxtNN6AZI-W0vb-E2XGSkzWuH_H3lJn_4eZoart1
+      JWT_REFRESH_SECRET: P_4AMUqrrjC-MThoeFKg6bSE72rUbCZsUpjsxnzT510DMV4RtwdkiEd_ttz4o1JN
+      BACKEND_URL: https://backend.serratech.tec.br
+      FRONTEND_URL: https://chat.serratech.tec.br
+      PROXY_PORT: 443
+      WHATSAPP_PROVIDER: wwebjs
+      LOG_LEVEL: info
+      CHROME_BIN: google-chrome-stable
+      CHROME_ARGS: --no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage
+    volumes:
+      - backend_public:/usr/src/app/public
+      - wwebjs_auth:/usr/src/app/.wwebjs_auth
+    depends_on:
+      mysql:
+        condition: service_healthy
+    shm_size: "1gb"
+    expose:
+      - "3000"
+    restart: unless-stopped
+    networks:
+      - whaticket
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      VITE_BACKEND_URL: https://backend.serratech.tec.br/
+      VITE_HOURS_CLOSE_TICKETS_AUTO: ""
+      URL_BACKEND: backend:3000
+      FRONTEND_SERVER_NAME: chat.serratech.tec.br
+      BACKEND_SERVER_NAME: ""
+    depends_on:
+      - backend
+    expose:
+      - "80"
+    restart: unless-stopped
+    networks:
+      - whaticket
+
+volumes:
+  mysql_data:
+  backend_public:
+  wwebjs_auth:
+
+networks:
+  whaticket:
