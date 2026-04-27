@@ -445,15 +445,12 @@ const init = async (whatsapp: Whatsapp): Promise<void> => {
     removeSession(whatsapp.id);
 
     const io = getIO();
-    const sessionName = whatsapp.name;
-    const sessionCfg = whatsapp?.session ? JSON.parse(whatsapp.session) : {};
+const sessionName = whatsapp.name;
+const args: string = process.env.CHROME_ARGS || "";
 
-    const args: string = process.env.CHROME_ARGS || "";
-
-    const wbot: Session = new Client({
-      session: sessionCfg,
-      authStrategy: new LocalAuth({ clientId: `bd_${whatsapp.id}` }),
-      puppeteer: {
+const wbot: Session = new Client({
+  authStrategy: new LocalAuth({ clientId: `bd_${whatsapp.id}` }),
+  puppeteer: {
         // headless: false, // TODO make sure chromium closes on session disconnection / delete
         executablePath: process.env.CHROME_BIN || undefined,
         browserWSEndpoint: process.env.CHROME_WS || undefined,
