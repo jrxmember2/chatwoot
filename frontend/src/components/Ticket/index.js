@@ -161,7 +161,7 @@ const Ticket = () => {
             />
           </div>
           <div className={classes.ticketActionButtons}>
-            <TicketActionButtons ticket={ticket} />
+            <TicketActionButtons ticket={{ ...ticket, contact }} />
           </div>
         </TicketHeader>
         <ReplyMessageProvider>

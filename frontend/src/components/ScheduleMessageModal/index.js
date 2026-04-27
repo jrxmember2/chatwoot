@@ -119,7 +119,7 @@ const ScheduleMessageModal = ({ open, onClose, ticket }) => {
 			return;
 		}
 
-		if (!ticket?.id || !ticket?.contact?.id || !ticket?.whatsappId) {
+		if (!ticket?.id) {
 			toast.error(
 				i18n.t("backendErrors.ERR_SCHEDULED_MESSAGE_INVALID_TICKET_RELATION")
 			);
@@ -130,8 +130,6 @@ const ScheduleMessageModal = ({ open, onClose, ticket }) => {
 
 		const formData = new FormData();
 		formData.append("ticketId", String(ticket.id));
-		formData.append("contactId", String(ticket.contact.id));
-		formData.append("whatsappId", String(ticket.whatsappId));
 		formData.append("body", trimmedMessage);
 		formData.append("scheduledAt", scheduledAt.toISOString());
 		formData.append("signMessage", String(signMessage));

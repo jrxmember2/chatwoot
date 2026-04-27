@@ -16,8 +16,6 @@ const parseBoolean = (value: string | boolean | undefined): boolean =>
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticketId = Number(req.body.ticketId);
-  const contactId = Number(req.body.contactId);
-  const whatsappId = Number(req.body.whatsappId);
   const body = req.body.body?.trim();
   const scheduledAtValue = req.body.scheduledAt;
   const signMessage = parseBoolean(req.body.signMessage);
@@ -34,7 +32,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const scheduledAt = new Date(scheduledAtValue);
 
-  if (Number.isNaN(ticketId) || Number.isNaN(contactId) || Number.isNaN(whatsappId)) {
+  if (Number.isNaN(ticketId)) {
     throw new AppError("ERR_SCHEDULED_MESSAGE_INVALID_TICKET_RELATION", 400);
   }
 
@@ -47,8 +45,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const ticket = await ShowTicketService(ticketId);
+  const { contactId, whatsappId } = ticket;
 
-  if (ticket.contactId !== contactId || ticket.whatsappId !== whatsappId) {
+  if (!contactId || !whatsappId) {
     throw new AppError("ERR_SCHEDULED_MESSAGE_INVALID_TICKET_RELATION", 400);
   }
 
