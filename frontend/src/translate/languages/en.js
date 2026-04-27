@@ -398,6 +398,7 @@ const messages = {
       ticketOptionsMenu: {
         delete: "Delete",
         transfer: "Transfer",
+        scheduleMessage: "Schedule send",
         confirmationModal: {
           title: "Delete ticket #",
           titleFrom: "from contact ",
@@ -406,6 +407,25 @@ const messages = {
         buttons: {
           delete: "Delete",
           cancel: "Cancel",
+        },
+      },
+      scheduleMessageModal: {
+        title: "Schedule message send",
+        contact: "Contact name",
+        number: "Contact number",
+        ticket: "Ticket ID",
+        message: "Message",
+        attachFile: "Attach file",
+        selectedFile: "Selected file",
+        sendDate: "Send date",
+        sendTime: "Send time",
+        signMessage: "Sign message",
+        cancel: "Cancel",
+        confirm: "Schedule send",
+        success: "Message scheduled successfully.",
+        errors: {
+          required: "Enter a message or attach a file.",
+          pastDate: "Choose a future date and time.",
         },
       },
       confirmationModal: {
@@ -450,6 +470,20 @@ const messages = {
         ERR_NO_TICKET_FOUND: "No ticket found with this ID.",
         ERR_NO_USER_FOUND: "No user found with this ID.",
         ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
+        ERR_SCHEDULED_MESSAGE_EMPTY:
+          "Enter a message or attach a file before scheduling.",
+        ERR_SCHEDULED_MESSAGE_DATE_REQUIRED:
+          "A schedule date and time are required.",
+        ERR_SCHEDULED_MESSAGE_INVALID_DATE:
+          "The scheduled date is invalid.",
+        ERR_SCHEDULED_MESSAGE_PAST_DATE:
+          "You cannot schedule messages in the past.",
+        ERR_SCHEDULED_MESSAGE_INVALID_TICKET_RELATION:
+          "The provided ticket data does not match the current conversation.",
+        ERR_NO_SCHEDULED_MESSAGE_FOUND:
+          "No scheduled message found with this ID.",
+        ERR_SCHEDULED_MESSAGE_CANCEL_NOT_ALLOWED:
+          "Only pending scheduled messages can be canceled.",
         ERR_CREATING_MESSAGE: "Error while creating message on database.",
         ERR_CREATING_TICKET: "Error while creating ticket on database.",
         ERR_FETCH_WAPP_MSG:

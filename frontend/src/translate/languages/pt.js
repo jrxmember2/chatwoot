@@ -403,14 +403,35 @@ const messages = {
       ticketOptionsMenu: {
         delete: "Deletar",
         transfer: "Transferir",
+        scheduleMessage: "Agendar envio",
         confirmationModal: {
           title: "Deletar o ticket do contato",
+          titleFrom: "do contato ",
           message:
             "Atenção! Todas as mensagens relacionadas ao ticket serão perdidas.",
         },
         buttons: {
           delete: "Excluir",
           cancel: "Cancelar",
+        },
+      },
+      scheduleMessageModal: {
+        title: "Agendar envio de mensagem",
+        contact: "Nome do contato",
+        number: "Numero do contato",
+        ticket: "ID do ticket",
+        message: "Mensagem",
+        attachFile: "Anexar arquivo",
+        selectedFile: "Arquivo selecionado",
+        sendDate: "Data do envio",
+        sendTime: "Hora do envio",
+        signMessage: "Assinar mensagem",
+        cancel: "Cancelar",
+        confirm: "Agendar envio",
+        success: "Mensagem agendada com sucesso.",
+        errors: {
+          required: "Informe uma mensagem ou anexe um arquivo.",
+          pastDate: "Informe uma data e hora futuras.",
         },
       },
       confirmationModal: {
@@ -454,6 +475,20 @@ const messages = {
         ERR_NO_TICKET_FOUND: "Nenhum tíquete encontrado com este ID.",
         ERR_NO_USER_FOUND: "Nenhum usuário encontrado com este ID.",
         ERR_NO_WAPP_FOUND: "Nenhum WhatsApp encontrado com este ID.",
+        ERR_SCHEDULED_MESSAGE_EMPTY:
+          "Informe uma mensagem ou anexe um arquivo para agendar.",
+        ERR_SCHEDULED_MESSAGE_DATE_REQUIRED:
+          "A data e hora do agendamento sao obrigatorias.",
+        ERR_SCHEDULED_MESSAGE_INVALID_DATE:
+          "A data informada para o agendamento e invalida.",
+        ERR_SCHEDULED_MESSAGE_PAST_DATE:
+          "Nao e possivel agendar mensagens no passado.",
+        ERR_SCHEDULED_MESSAGE_INVALID_TICKET_RELATION:
+          "Os dados do ticket informados nao conferem com a conversa atual.",
+        ERR_NO_SCHEDULED_MESSAGE_FOUND:
+          "Nenhum agendamento encontrado com este ID.",
+        ERR_SCHEDULED_MESSAGE_CANCEL_NOT_ALLOWED:
+          "Somente agendamentos pendentes podem ser cancelados.",
         ERR_CREATING_MESSAGE: "Erro ao criar mensagem no banco de dados.",
         ERR_CREATING_TICKET: "Erro ao criar tíquete no banco de dados.",
         ERR_FETCH_WAPP_MSG:

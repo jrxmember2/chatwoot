@@ -404,6 +404,7 @@ const messages = {
       ticketOptionsMenu: {
         delete: "Borrar",
         transfer: "Transferir",
+        scheduleMessage: "Programar envio",
         confirmationModal: {
           title: "¿Borrar ticket #",
           titleFrom: "del contacto ",
@@ -413,6 +414,25 @@ const messages = {
         buttons: {
           delete: "Borrar",
           cancel: "Cancelar",
+        },
+      },
+      scheduleMessageModal: {
+        title: "Programar envio de mensaje",
+        contact: "Nombre del contacto",
+        number: "Numero del contacto",
+        ticket: "ID del ticket",
+        message: "Mensaje",
+        attachFile: "Adjuntar archivo",
+        selectedFile: "Archivo seleccionado",
+        sendDate: "Fecha del envio",
+        sendTime: "Hora del envio",
+        signMessage: "Firmar mensaje",
+        cancel: "Cancelar",
+        confirm: "Programar envio",
+        success: "Mensaje programado correctamente.",
+        errors: {
+          required: "Ingresa un mensaje o adjunta un archivo.",
+          pastDate: "Elige una fecha y hora futuras.",
         },
       },
       confirmationModal: {
@@ -457,6 +477,20 @@ const messages = {
         ERR_NO_TICKET_FOUND: "No se encontró ningún ticket con este ID.",
         ERR_NO_USER_FOUND: "No se encontró ningún usuario con este ID.",
         ERR_NO_WAPP_FOUND: "No se encontró WhatsApp con este ID.",
+        ERR_SCHEDULED_MESSAGE_EMPTY:
+          "Ingresa un mensaje o adjunta un archivo antes de programar.",
+        ERR_SCHEDULED_MESSAGE_DATE_REQUIRED:
+          "La fecha y hora del envio son obligatorias.",
+        ERR_SCHEDULED_MESSAGE_INVALID_DATE:
+          "La fecha informada para el envio no es valida.",
+        ERR_SCHEDULED_MESSAGE_PAST_DATE:
+          "No es posible programar mensajes en el pasado.",
+        ERR_SCHEDULED_MESSAGE_INVALID_TICKET_RELATION:
+          "Los datos del ticket no coinciden con la conversacion actual.",
+        ERR_NO_SCHEDULED_MESSAGE_FOUND:
+          "No se encontro ningun agendamiento con este ID.",
+        ERR_SCHEDULED_MESSAGE_CANCEL_NOT_ALLOWED:
+          "Solo se pueden cancelar agendamientos pendientes.",
         ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
         ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
         ERR_FETCH_WAPP_MSG:

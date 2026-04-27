@@ -9,12 +9,14 @@ interface Request {
   media: Express.Multer.File;
   ticket: Ticket;
   body?: string;
+  removeAfterSend?: boolean;
 }
 
 const SendWhatsAppMedia = async ({
   media,
   ticket,
-  body
+  body,
+  removeAfterSend = true
 }: Request): Promise<ProviderMessage> => {
   try {
     if (!ticket.whatsappId) {
@@ -48,9 +50,13 @@ const SendWhatsAppMedia = async ({
       mediaOptions
     );
 
-    await ticket.update({ lastMessage: body || media.filename });
+    await ticket.update({
+      lastMessage: body || media.originalname || media.filename
+    });
 
-    fs.unlinkSync(media.path);
+    if (removeAfterSend && fs.existsSync(media.path)) {
+      fs.unlinkSync(media.path);
+    }
 
     return sentMessage;
   } catch (err) {
