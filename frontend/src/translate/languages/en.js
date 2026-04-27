@@ -470,6 +470,8 @@ const messages = {
         ERR_NO_TICKET_FOUND: "No ticket found with this ID.",
         ERR_NO_USER_FOUND: "No user found with this ID.",
         ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
+        ERR_TICKET_NO_WHATSAPP:
+          "This ticket does not have a linked WhatsApp connection.",
         ERR_SCHEDULED_MESSAGE_EMPTY:
           "Enter a message or attach a file before scheduling.",
         ERR_SCHEDULED_MESSAGE_DATE_REQUIRED:

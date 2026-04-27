@@ -129,7 +129,16 @@ const ScheduleMessageModal = ({ open, onClose, ticket }) => {
 		setLoading(true);
 
 		const formData = new FormData();
+		const contactId = ticket?.contact?.id || ticket?.contactId;
+		const whatsappId = ticket?.whatsappId || ticket?.whatsapp?.id;
+
 		formData.append("ticketId", String(ticket.id));
+		if (contactId) {
+			formData.append("contactId", String(contactId));
+		}
+		if (whatsappId) {
+			formData.append("whatsappId", String(whatsappId));
+		}
 		formData.append("body", trimmedMessage);
 		formData.append("scheduledAt", scheduledAt.toISOString());
 		formData.append("signMessage", String(signMessage));
