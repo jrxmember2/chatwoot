@@ -417,6 +417,8 @@ const messages = {
         message: "Message",
         attachFile: "Attach file",
         selectedFile: "Selected file",
+        connection: "Outgoing connection",
+        selectConnection: "Select a connection",
         sendDate: "Send date",
         sendTime: "Send time",
         signMessage: "Sign message",
@@ -425,6 +427,7 @@ const messages = {
         success: "Message scheduled successfully.",
         errors: {
           required: "Enter a message or attach a file.",
+          connectionRequired: "Select which connection will send this message.",
           pastDate: "Choose a future date and time.",
         },
       },

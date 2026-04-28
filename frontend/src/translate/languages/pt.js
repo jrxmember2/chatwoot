@@ -423,6 +423,8 @@ const messages = {
         message: "Mensagem",
         attachFile: "Anexar arquivo",
         selectedFile: "Arquivo selecionado",
+        connection: "Conexao de saida",
+        selectConnection: "Selecione uma conexao",
         sendDate: "Data do envio",
         sendTime: "Hora do envio",
         signMessage: "Assinar mensagem",
@@ -431,6 +433,7 @@ const messages = {
         success: "Mensagem agendada com sucesso.",
         errors: {
           required: "Informe uma mensagem ou anexe um arquivo.",
+          connectionRequired: "Selecione a conexao pela qual a mensagem sera enviada.",
           pastDate: "Informe uma data e hora futuras.",
         },
       },

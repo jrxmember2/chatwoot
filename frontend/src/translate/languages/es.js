@@ -424,6 +424,8 @@ const messages = {
         message: "Mensaje",
         attachFile: "Adjuntar archivo",
         selectedFile: "Archivo seleccionado",
+        connection: "Conexion de salida",
+        selectConnection: "Seleccione una conexion",
         sendDate: "Fecha del envio",
         sendTime: "Hora del envio",
         signMessage: "Firmar mensaje",
@@ -432,6 +434,7 @@ const messages = {
         success: "Mensaje programado correctamente.",
         errors: {
           required: "Ingresa un mensaje o adjunta un archivo.",
+          connectionRequired: "Selecciona por cual conexion se enviara el mensaje.",
           pastDate: "Elige una fecha y hora futuras.",
         },
       },

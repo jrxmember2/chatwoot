@@ -5,6 +5,7 @@ import ScheduledMessage from "../models/ScheduledMessage";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import User from "../models/User";
+import Whatsapp from "../models/Whatsapp";
 
 type IndexQuery = {
   ticketId?: string;
@@ -16,7 +17,7 @@ const parseBoolean = (value: string | boolean | undefined): boolean =>
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticketId = Number(req.body.ticketId);
   const fallbackContactId = Number(req.body.contactId);
-  const fallbackWhatsappId = Number(req.body.whatsappId);
+  const selectedWhatsappId = Number(req.body.whatsappId);
   const body = req.body.body?.trim();
   const scheduledAtValue = req.body.scheduledAt;
   const signMessage = parseBoolean(req.body.signMessage);
@@ -52,7 +53,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const contactId = ticket.contactId || fallbackContactId;
-  const whatsappId = ticket.whatsappId || fallbackWhatsappId;
+  const whatsappId =
+    (!Number.isNaN(selectedWhatsappId) && selectedWhatsappId) ||
+    ticket.whatsappId;
 
   if (!contactId) {
     throw new AppError("ERR_SCHEDULED_MESSAGE_INVALID_TICKET_RELATION", 400);
@@ -60,6 +63,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (!whatsappId) {
     throw new AppError("ERR_TICKET_NO_WHATSAPP", 400);
+  }
+
+  const whatsapp = await Whatsapp.findByPk(whatsappId);
+
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
 
   const scheduledMessage = await ScheduledMessage.create({

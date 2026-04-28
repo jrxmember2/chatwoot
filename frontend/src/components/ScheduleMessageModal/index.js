@@ -1,12 +1,17 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
 	Button,
+	CircularProgress,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	FormControl,
 	FormControlLabel,
 	Grid,
+	InputLabel,
+	MenuItem,
+	Select,
 	Switch,
 	TextField,
 	Typography,
@@ -19,6 +24,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import ButtonWithSpinner from "../ButtonWithSpinner";
+import useWhatsApps from "../../hooks/useWhatsApps";
 
 const useStyles = makeStyles(theme => ({
 	contactInfo: {
@@ -31,6 +37,10 @@ const useStyles = makeStyles(theme => ({
 	fileInfo: {
 		marginTop: theme.spacing(1),
 		wordBreak: "break-word",
+	},
+
+	fieldBlock: {
+		marginTop: theme.spacing(2),
 	},
 }));
 
@@ -53,9 +63,11 @@ const ScheduleMessageModal = ({ open, onClose, ticket }) => {
 	const classes = useStyles();
 	const fileInputRef = useRef(null);
 	const { user } = useContext(AuthContext);
+	const { whatsApps, loading: loadingWhatsapps } = useWhatsApps();
 
 	const [message, setMessage] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
+	const [selectedWhatsapp, setSelectedWhatsapp] = useState("");
 	const [sendDate, setSendDate] = useState("");
 	const [sendTime, setSendTime] = useState("");
 	const [signMessage, setSignMessage] = useState(true);
@@ -66,6 +78,7 @@ const ScheduleMessageModal = ({ open, onClose, ticket }) => {
 
 		setMessage("");
 		setSelectedFile(null);
+		setSelectedWhatsapp(String(ticket?.whatsappId || ticket?.whatsapp?.id || ""));
 		setSendDate(initialState.sendDate);
 		setSendTime(initialState.sendTime);
 		setSignMessage(true);
@@ -126,19 +139,21 @@ const ScheduleMessageModal = ({ open, onClose, ticket }) => {
 			return;
 		}
 
+		if (!selectedWhatsapp) {
+			toast.error(i18n.t("scheduleMessageModal.errors.connectionRequired"));
+			return;
+		}
+
 		setLoading(true);
 
 		const formData = new FormData();
 		const contactId = ticket?.contact?.id || ticket?.contactId;
-		const whatsappId = ticket?.whatsappId || ticket?.whatsapp?.id;
 
 		formData.append("ticketId", String(ticket.id));
 		if (contactId) {
 			formData.append("contactId", String(contactId));
 		}
-		if (whatsappId) {
-			formData.append("whatsappId", String(whatsappId));
-		}
+		formData.append("whatsappId", String(selectedWhatsapp));
 		formData.append("body", trimmedMessage);
 		formData.append("scheduledAt", scheduledAt.toISOString());
 		formData.append("signMessage", String(signMessage));
@@ -207,6 +222,32 @@ const ScheduleMessageModal = ({ open, onClose, ticket }) => {
 							{i18n.t("scheduleMessageModal.selectedFile")}:{" "}
 							{selectedFile ? selectedFile.name : "-"}
 						</Typography>
+					</div>
+
+					<div className={classes.fieldBlock}>
+						{loadingWhatsapps ? (
+							<CircularProgress size={24} />
+						) : (
+							<FormControl variant="outlined" fullWidth required>
+								<InputLabel>
+									{i18n.t("scheduleMessageModal.connection")}
+								</InputLabel>
+								<Select
+									value={selectedWhatsapp}
+									onChange={event => setSelectedWhatsapp(event.target.value)}
+									label={i18n.t("scheduleMessageModal.connection")}
+								>
+									<MenuItem value="">
+										{i18n.t("scheduleMessageModal.selectConnection")}
+									</MenuItem>
+									{whatsApps.map(whatsapp => (
+										<MenuItem key={whatsapp.id} value={String(whatsapp.id)}>
+											{whatsapp.name}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						)}
 					</div>
 
 					<Grid container spacing={2} style={{ marginTop: 8 }}>
