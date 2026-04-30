@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import openSocket from "../../services/socket-io";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -7,6 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
 import { toast } from "react-toastify";
 
 import api from "../../services/api";
@@ -33,6 +35,13 @@ const useStyles = makeStyles(theme => ({
 	},
 	margin: {
 		margin: theme.spacing(1),
+	},
+	brandingPaper: {
+		padding: theme.spacing(2),
+		marginBottom: 12,
+	},
+	brandingAction: {
+		marginTop: theme.spacing(2),
 	},
 
 }));
@@ -98,6 +107,23 @@ const Settings = () => {
 				<Typography variant="body2" gutterBottom>
 					{i18n.t("settings.title")}
 				</Typography>
+				<Paper className={classes.brandingPaper}>
+					<Typography variant="h6">
+						{i18n.t("branding.title")}
+					</Typography>
+					<Typography variant="body2" color="textSecondary">
+						{i18n.t("branding.description")}
+					</Typography>
+					<Button
+						component={RouterLink}
+						to="/branding"
+						variant="contained"
+						color="primary"
+						className={classes.brandingAction}
+					>
+						{i18n.t("branding.buttons.open")}
+					</Button>
+				</Paper>
 				<Paper className={classes.paper}>
 					<Typography variant="body1">
 						{i18n.t("settings.settings.userCreation.name")}

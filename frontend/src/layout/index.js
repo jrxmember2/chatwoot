@@ -25,6 +25,7 @@ import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import { i18n } from "../translate/i18n";
 import { useThemeContext } from "../context/DarkMode";
+import { BrandingContext } from "../context/Branding/BrandingContext";
 
 const drawerWidth = 240;
 
@@ -124,6 +125,34 @@ const useStyles = makeStyles((theme) => ({
   themeIcon: {
     color: theme.palette.text.primary,
   },
+  titleContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+  },
+  titleLogo: {
+    maxHeight: 28,
+    maxWidth: 120,
+    objectFit: "contain",
+  },
+  drawerBrand: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "column",
+    padding: theme.spacing(2, 1),
+    gap: theme.spacing(1),
+  },
+  drawerLogo: {
+    maxWidth: "100%",
+    maxHeight: 56,
+    objectFit: "contain",
+  },
+  drawerBrandText: {
+    textAlign: "center",
+    color: theme.palette.text.primary,
+    fontWeight: 600,
+  },
 }));
 
 const LoggedInLayout = ({ children }) => {
@@ -136,6 +165,7 @@ const LoggedInLayout = ({ children }) => {
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
   const { darkMode, toggleTheme } = useThemeContext();
+  const { branding } = useContext(BrandingContext);
 
   useEffect(() => {
     if (document.body.offsetWidth > 600) {
@@ -199,6 +229,26 @@ const LoggedInLayout = ({ children }) => {
             <ChevronLeftIcon />
           </IconButton>
         </div>
+        {branding.showInternalLogo && branding.internalLogoUrl ? (
+          <div className={classes.drawerBrand}>
+            <img
+              src={branding.internalLogoUrl}
+              alt={branding.systemName || "WhaTicket"}
+              className={classes.drawerLogo}
+            />
+            {drawerOpen ? (
+              <Typography variant="body1" className={classes.drawerBrandText}>
+                {branding.systemName || "WhaTicket"}
+              </Typography>
+            ) : null}
+          </div>
+        ) : drawerOpen ? (
+          <div className={classes.drawerBrand}>
+            <Typography variant="body1" className={classes.drawerBrandText}>
+              {branding.systemName || "WhaTicket"}
+            </Typography>
+          </div>
+        ) : null}
         <Divider />
         <List>
           <MainListItems drawerClose={drawerClose} />
@@ -232,7 +282,16 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            WhaTicket
+            <span className={classes.titleContainer}>
+              {branding.showInternalLogo && branding.internalLogoUrl ? (
+                <img
+                  src={branding.internalLogoUrl}
+                  alt={branding.systemName || "WhaTicket"}
+                  className={classes.titleLogo}
+                />
+              ) : null}
+              <span>{branding.systemName || "WhaTicket"}</span>
+            </span>
           </Typography>
 
           <div className={classes.themeSwitchContainer}>

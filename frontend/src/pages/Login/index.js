@@ -22,6 +22,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { BrandingContext } from "../../context/Branding/BrandingContext";
 
 // const Copyright = () => {
 // 	return (
@@ -54,6 +55,18 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  logo: {
+    maxWidth: 220,
+    maxHeight: 120,
+    objectFit: "contain",
+    marginBottom: theme.spacing(2),
+  },
+  systemName: {
+    marginBottom: theme.spacing(1),
+  },
+  footerText: {
+    textAlign: "center",
+  },
 }));
 
 const Login = () => {
@@ -63,6 +76,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const { handleLogin } = useContext(AuthContext);
+  const { branding } = useContext(BrandingContext);
 
   const handleChangeInput = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -77,10 +91,21 @@ const Login = () => {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlined />
-        </Avatar>
-        <Typography component="h1" variant="h5">
+        {branding.showLoginLogo && branding.loginLogoUrl ? (
+          <img
+            src={branding.loginLogoUrl}
+            alt={branding.systemName || "WhaTicket"}
+            className={classes.logo}
+          />
+        ) : (
+          <Avatar className={classes.avatar}>
+            <LockOutlined />
+          </Avatar>
+        )}
+        <Typography component="h1" variant="h5" className={classes.systemName}>
+          {branding.systemName || "WhaTicket"}
+        </Typography>
+        <Typography component="h2" variant="body1">
           {i18n.t("login.title")}
         </Typography>
         <form className={classes.form} noValidate onSubmit={handlSubmit}>
@@ -145,7 +170,13 @@ const Login = () => {
           </Grid>
         </form>
       </div>
-      <Box mt={8}>{/* <Copyright /> */}</Box>
+      <Box mt={8}>
+        {branding.loginFooterText ? (
+          <Typography variant="body2" color="textSecondary" className={classes.footerText}>
+            {branding.loginFooterText}
+          </Typography>
+        ) : null}
+      </Box>
     </Container>
   );
 };

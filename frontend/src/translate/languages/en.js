@@ -372,6 +372,36 @@ const messages = {
           },
         },
       },
+      branding: {
+        title: "Branding",
+        description:
+          "Set the logos, favicon, system name, colors and texts shown on the login screen and inside the system.",
+        fields: {
+          loginLogo: "Login screen logo",
+          internalLogo: "Internal logo",
+          favicon: "Favicon",
+          systemName: "System name",
+          pageTitle: "Page title",
+          primaryColor: "Primary color",
+          secondaryColor: "Secondary color",
+          loginFooterText: "Login footer text",
+          showLoginLogo: "Show logo on login screen",
+          showInternalLogo: "Show logo in internal area",
+        },
+        buttons: {
+          open: "Open Branding",
+          selectLoginLogo: "Select login logo",
+          selectInternalLogo: "Select internal logo",
+          selectFavicon: "Select favicon",
+          save: "Save",
+          saving: "Saving...",
+        },
+        preview: {
+          empty: "No file uploaded.",
+          current: "Keeping current file.",
+        },
+        success: "Branding saved successfully.",
+      },
       messagesList: {
         header: {
           assignedTo: "Assigned to:",
@@ -489,6 +519,12 @@ const messages = {
           "No scheduled message found with this ID.",
         ERR_SCHEDULED_MESSAGE_CANCEL_NOT_ALLOWED:
           "Only pending scheduled messages can be canceled.",
+        ERR_INVALID_BRANDING_MEDIA_TYPE:
+          "Upload only PNG, JPG, JPEG, WEBP or ICO images for branding.",
+        ERR_NO_BRANDING_FILE_SENT:
+          "Select at least one branding file to upload.",
+        ERR_BRANDING_INVALID_COLOR:
+          "Enter valid hexadecimal colors.",
         ERR_CREATING_MESSAGE: "Error while creating message on database.",
         ERR_CREATING_TICKET: "Error while creating ticket on database.",
         ERR_FETCH_WAPP_MSG:

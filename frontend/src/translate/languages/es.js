@@ -377,6 +377,36 @@ const messages = {
           },
         },
       },
+      branding: {
+        title: "Branding",
+        description:
+          "Define logos, favicon, nombre del sistema, colores y textos mostrados en el login y en el area interna.",
+        fields: {
+          loginLogo: "Logo de la pantalla de login",
+          internalLogo: "Logo interna",
+          favicon: "Favicon",
+          systemName: "Nombre del sistema",
+          pageTitle: "Titulo de la pagina",
+          primaryColor: "Color primario",
+          secondaryColor: "Color secundario",
+          loginFooterText: "Texto del pie del login",
+          showLoginLogo: "Mostrar logo en la pantalla de login",
+          showInternalLogo: "Mostrar logo en el area interna",
+        },
+        buttons: {
+          open: "Abrir Branding",
+          selectLoginLogo: "Seleccionar logo del login",
+          selectInternalLogo: "Seleccionar logo interna",
+          selectFavicon: "Seleccionar favicon",
+          save: "Guardar",
+          saving: "Guardando...",
+        },
+        preview: {
+          empty: "Ningun archivo enviado.",
+          current: "Manteniendo archivo actual.",
+        },
+        success: "Branding guardado con exito.",
+      },
       messagesList: {
         header: {
           assignedTo: "Asignado a:",
@@ -496,6 +526,12 @@ const messages = {
           "No se encontro ningun agendamiento con este ID.",
         ERR_SCHEDULED_MESSAGE_CANCEL_NOT_ALLOWED:
           "Solo se pueden cancelar agendamientos pendientes.",
+        ERR_INVALID_BRANDING_MEDIA_TYPE:
+          "Sube solo imagenes PNG, JPG, JPEG, WEBP o ICO para el branding.",
+        ERR_NO_BRANDING_FILE_SENT:
+          "Selecciona al menos un archivo de branding para subir.",
+        ERR_BRANDING_INVALID_COLOR:
+          "Informa colores validos en formato hexadecimal.",
         ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
         ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
         ERR_FETCH_WAPP_MSG:

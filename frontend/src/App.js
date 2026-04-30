@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import Routes from "./routes";
 import "react-toastify/dist/ReactToastify.css";
 
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { ptBR } from "@material-ui/core/locale";
+import {
+  BrandingContext,
+  defaultBranding
+} from "./context/Branding/BrandingContext";
 
 const App = () => {
   const [locale, setLocale] = useState();
+  const { branding } = useContext(BrandingContext);
 
   const theme = createTheme(
     {
@@ -21,7 +26,10 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: "#2576d2" },
+        primary: { main: branding.primaryColor || defaultBranding.primaryColor },
+        secondary: {
+          main: branding.secondaryColor || defaultBranding.secondaryColor
+        }
       },
     },
     locale

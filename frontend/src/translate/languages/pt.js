@@ -376,6 +376,36 @@ const messages = {
           },
         },
       },
+      branding: {
+        title: "Branding",
+        description:
+          "Defina logos, favicon, nome do sistema, cores e textos exibidos no login e na area interna.",
+        fields: {
+          loginLogo: "Logo da tela de login",
+          internalLogo: "Logo da area interna",
+          favicon: "Favicon",
+          systemName: "Nome do sistema",
+          pageTitle: "Titulo da pagina",
+          primaryColor: "Cor primaria",
+          secondaryColor: "Cor secundaria",
+          loginFooterText: "Texto de rodape do login",
+          showLoginLogo: "Exibir logo na tela de login",
+          showInternalLogo: "Exibir logo na area interna",
+        },
+        buttons: {
+          open: "Abrir Branding",
+          selectLoginLogo: "Selecionar logo do login",
+          selectInternalLogo: "Selecionar logo interna",
+          selectFavicon: "Selecionar favicon",
+          save: "Salvar",
+          saving: "Salvando...",
+        },
+        preview: {
+          empty: "Nenhum arquivo enviado.",
+          current: "Mantendo arquivo atual.",
+        },
+        success: "Branding salvo com sucesso.",
+      },
       messagesList: {
         header: {
           assignedTo: "Atribuído à:",
@@ -494,6 +524,12 @@ const messages = {
           "Nenhum agendamento encontrado com este ID.",
         ERR_SCHEDULED_MESSAGE_CANCEL_NOT_ALLOWED:
           "Somente agendamentos pendentes podem ser cancelados.",
+        ERR_INVALID_BRANDING_MEDIA_TYPE:
+          "Envie apenas imagens PNG, JPG, JPEG, WEBP ou ICO para o branding.",
+        ERR_NO_BRANDING_FILE_SENT:
+          "Selecione pelo menos um arquivo para upload do branding.",
+        ERR_BRANDING_INVALID_COLOR:
+          "Informe cores validas no formato hexadecimal.",
         ERR_CREATING_MESSAGE: "Erro ao criar mensagem no banco de dados.",
         ERR_CREATING_TICKET: "Erro ao criar tíquete no banco de dados.",
         ERR_FETCH_WAPP_MSG:

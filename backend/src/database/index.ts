@@ -12,6 +12,7 @@ import UserQueue from "../models/UserQueue";
 import QuickAnswer from "../models/QuickAnswer";
 import WppKey from "../models/WppKey";
 import ScheduledMessage from "../models/ScheduledMessage";
+import BrandingSetting from "../models/BrandingSetting";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -32,7 +33,8 @@ const models = [
   UserQueue,
   QuickAnswer,
   WppKey,
-  ScheduledMessage
+  ScheduledMessage,
+  BrandingSetting
 ];
 
 sequelize.addModels(models);
