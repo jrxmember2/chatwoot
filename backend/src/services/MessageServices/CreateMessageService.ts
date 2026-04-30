@@ -14,13 +14,17 @@ interface MessageData {
   mediaUrl?: string;
   ack?: number;
   quotedMsgId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 interface Request {
   messageData: MessageData;
+  skipSocketEmit?: boolean;
 }
 
 const CreateMessageService = async ({
-  messageData
+  messageData,
+  skipSocketEmit = false
 }: Request): Promise<Message> => {
   await Message.upsert(messageData);
 
@@ -50,6 +54,10 @@ const CreateMessageService = async ({
 
   if (!message) {
     throw new Error("ERR_CREATING_MESSAGE");
+  }
+
+  if (skipSocketEmit) {
+    return message;
   }
 
   const io = getIO();

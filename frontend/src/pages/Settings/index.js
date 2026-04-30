@@ -43,6 +43,10 @@ const useStyles = makeStyles(theme => ({
 	brandingAction: {
 		marginTop: theme.spacing(2),
 	},
+	modulePaper: {
+		padding: theme.spacing(2),
+		marginBottom: 12,
+	},
 
 }));
 
@@ -107,6 +111,23 @@ const Settings = () => {
 				<Typography variant="body2" gutterBottom>
 					{i18n.t("settings.title")}
 				</Typography>
+				<Paper className={classes.modulePaper}>
+					<Typography variant="h6">
+						{i18n.t("connections.title")}
+					</Typography>
+					<Typography variant="body2" color="textSecondary">
+						{i18n.t("connections.manageDescription")}
+					</Typography>
+					<Button
+						component={RouterLink}
+						to="/connections"
+						variant="contained"
+						color="primary"
+						className={classes.brandingAction}
+					>
+						{i18n.t("mainDrawer.listItems.connections")}
+					</Button>
+				</Paper>
 				<Paper className={classes.brandingPaper}>
 					<Typography variant="h6">
 						{i18n.t("branding.title")}

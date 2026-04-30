@@ -8,6 +8,7 @@ import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsServi
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import { whatsappProvider } from "../providers/WhatsApp";
+import { maybeStartConfiguredOldMessagesImportInBackground } from "../services/WhatsappHistoryServices/ImportOldMessagesService";
 
 interface WhatsappData {
   name: string;
@@ -16,6 +17,8 @@ interface WhatsappData {
   farewellMessage?: string;
   status?: string;
   isDefault?: boolean;
+  importOldMessages?: boolean;
+  importOldMessagesDays?: number | null;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -31,7 +34,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
+    queueIds,
+    importOldMessages,
+    importOldMessagesDays
   }: WhatsappData = req.body;
 
   const { whatsapp, oldDefaultWhatsapp } = await CreateWhatsAppService({
@@ -40,7 +45,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
+    queueIds,
+    importOldMessages,
+    importOldMessagesDays
   });
 
   StartWhatsAppSession(whatsapp);
@@ -80,6 +87,14 @@ export const update = async (
     whatsappData,
     whatsappId
   });
+
+  if (
+    whatsapp.status === "CONNECTED" &&
+    whatsapp.importOldMessages &&
+    whatsapp.oldMessagesImportStatus === "pending"
+  ) {
+    await maybeStartConfiguredOldMessagesImportInBackground(whatsapp.id);
+  }
 
   const io = getIO();
   io.emit("whatsapp", {

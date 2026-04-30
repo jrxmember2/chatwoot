@@ -543,4 +543,40 @@ const messages = {
   },
 };
 
+messages.pt.translations.connections.importOldMessages =
+  "Baixar mensagens do celular";
+messages.pt.translations.connections.importOldMessagesDays =
+  "Quantidade de dias para buscar";
+messages.pt.translations.connections.importOldMessagesHelp =
+  "O sistema tentara importar as conversas disponiveis no WhatsApp Web dentro desse periodo. Dependendo do WhatsApp, nem todo o historico antigo pode estar disponivel.";
+messages.pt.translations.connections.manageDescription =
+  "Gerencie conexoes, sessoes, QR Code e sincronizacao do WhatsApp.";
+messages.pt.translations.connections.importOldMessagesStatus =
+  "Status da sincronizacao";
+messages.pt.translations.connections.importOldMessagesNow =
+  "Sincronizar agora";
+messages.pt.translations.connections.importOldMessagesRunning =
+  "Sincronizacao em andamento";
+messages.pt.translations.connections.importOldMessagesDone = "Concluido";
+messages.pt.translations.connections.importOldMessagesFailed = "Falhou";
+messages.pt.translations.connections.importOldMessagesPending = "Pendente";
+messages.pt.translations.connections.importOldMessagesIdle = "Nao iniciado";
+messages.pt.translations.connections.importOldMessagesLastRun =
+  "Ultima sincronizacao";
+messages.pt.translations.connections.importOldMessagesValidationDays =
+  "Informe uma quantidade de dias entre 1 e 90.";
+messages.pt.translations.connections.importOldMessagesStarted =
+  "Sincronizacao de mensagens antigas iniciada com sucesso.";
+messages.pt.translations.connections.importOldMessagesAlreadyRunning =
+  "Ja existe uma sincronizacao em andamento para esta conexao.";
+messages.pt.translations.mainDrawer.listItems.attendance = "Atendimento";
+messages.pt.translations.mainDrawer.listItems.settingsGroup =
+  "Configuracoes";
+messages.pt.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_INVALID_DAYS =
+  "Informe uma quantidade de dias entre 1 e 90 para a sincronizacao.";
+messages.pt.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_ALREADY_RUNNING =
+  "Ja existe uma sincronizacao em andamento para esta conexao.";
+messages.pt.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_UNSUPPORTED =
+  "A sincronizacao de mensagens antigas esta disponivel apenas para conexoes wwebjs.";
+
 export { messages };

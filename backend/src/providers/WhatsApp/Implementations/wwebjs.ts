@@ -29,8 +29,9 @@ import {
   MediaPayload,
   WhatsappContextPayload
 } from "../../../handlers/handleWhatsappEvents";
+import { maybeStartConfiguredOldMessagesImportInBackground } from "../../../services/WhatsappHistoryServices/ImportOldMessagesService";
 
-interface Session extends Client {
+export interface Session extends Client {
   id?: number;
 }
 
@@ -43,6 +44,10 @@ const getWbot = (whatsappId: number): Session => {
     throw new AppError("ERR_WAPP_NOT_INITIALIZED");
   }
   return sessions[sessionIndex];
+};
+
+export const getWwebjsSession = (whatsappId: number): Session => {
+  return getWbot(whatsappId);
 };
 
 const mapMessageType = (wbotType: any): MessageType => {
@@ -531,6 +536,7 @@ const wbot: Session = new Client({
 
         wbot.sendPresenceAvailable();
         await syncUnreadMessages(wbot);
+        await maybeStartConfiguredOldMessagesImportInBackground(whatsapp.id);
       } catch (err) {
         logger.error(err, "Error on whatsapp ready event");
       }

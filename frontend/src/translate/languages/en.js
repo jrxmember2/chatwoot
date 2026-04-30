@@ -538,4 +538,39 @@ const messages = {
   },
 };
 
+messages.en.translations.connections.importOldMessages =
+  "Download phone messages";
+messages.en.translations.connections.importOldMessagesDays =
+  "Number of days to fetch";
+messages.en.translations.connections.importOldMessagesHelp =
+  "The system will try to import conversations available in WhatsApp Web within the selected period. Depending on WhatsApp, not all old history may be available.";
+messages.en.translations.connections.manageDescription =
+  "Manage connections, sessions, QR Code and WhatsApp synchronization.";
+messages.en.translations.connections.importOldMessagesStatus =
+  "Sync status";
+messages.en.translations.connections.importOldMessagesNow =
+  "Sync now";
+messages.en.translations.connections.importOldMessagesRunning =
+  "Sync in progress";
+messages.en.translations.connections.importOldMessagesDone = "Completed";
+messages.en.translations.connections.importOldMessagesFailed = "Failed";
+messages.en.translations.connections.importOldMessagesPending = "Pending";
+messages.en.translations.connections.importOldMessagesIdle = "Not started";
+messages.en.translations.connections.importOldMessagesLastRun =
+  "Last sync";
+messages.en.translations.connections.importOldMessagesValidationDays =
+  "Enter a number of days between 1 and 90.";
+messages.en.translations.connections.importOldMessagesStarted =
+  "Old messages sync started successfully.";
+messages.en.translations.connections.importOldMessagesAlreadyRunning =
+  "There is already a sync running for this connection.";
+messages.en.translations.mainDrawer.listItems.attendance = "Attendance";
+messages.en.translations.mainDrawer.listItems.settingsGroup = "Settings";
+messages.en.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_INVALID_DAYS =
+  "Enter a number of days between 1 and 90 for synchronization.";
+messages.en.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_ALREADY_RUNNING =
+  "There is already a sync running for this connection.";
+messages.en.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_UNSUPPORTED =
+  "Old messages sync is currently available only for wwebjs connections.";
+
 export { messages };

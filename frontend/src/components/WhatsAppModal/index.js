@@ -16,6 +16,7 @@ import {
 	TextField,
 	Switch,
 	FormControlLabel,
+	Typography,
 } from "@material-ui/core";
 
 import api from "../../services/api";
@@ -55,6 +56,19 @@ const SessionSchema = Yup.object().shape({
 		.min(2, "Too Short!")
 		.max(50, "Too Long!")
 		.required("Required"),
+	importOldMessages: Yup.boolean(),
+	importOldMessagesDays: Yup.number()
+		.nullable()
+		.when("importOldMessages", {
+			is: true,
+			then: Yup.number()
+				.typeError("connections.importOldMessagesValidationDays")
+				.required("connections.importOldMessagesValidationDays")
+				.integer("connections.importOldMessagesValidationDays")
+				.min(1, "connections.importOldMessagesValidationDays")
+				.max(90, "connections.importOldMessagesValidationDays"),
+			otherwise: Yup.number().nullable(),
+		}),
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
@@ -64,6 +78,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 		greetingMessage: "",
 		farewellMessage: "",
 		isDefault: false,
+		importOldMessages: false,
+		importOldMessagesDays: 20,
 	};
 	const [whatsApp, setWhatsApp] = useState(initialState);
 	const [selectedQueueIds, setSelectedQueueIds] = useState([]);
@@ -74,7 +90,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
 			try {
 				const { data } = await api.get(`whatsapp/${whatsAppId}`);
-				setWhatsApp(data);
+				setWhatsApp({
+					...initialState,
+					...data,
+					importOldMessagesDays: data.importOldMessagesDays || 20,
+				});
 
 				const whatsQueueIds = data.queues?.map(queue => queue.id);
 				setSelectedQueueIds(whatsQueueIds);
@@ -86,7 +106,14 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	}, [whatsAppId]);
 
 	const handleSaveWhatsApp = async values => {
-		const whatsappData = { ...values, queueIds: selectedQueueIds };
+		const whatsappData = {
+			...values,
+			queueIds: selectedQueueIds,
+			importOldMessages: Boolean(values.importOldMessages),
+			importOldMessagesDays: values.importOldMessages
+				? Number(values.importOldMessagesDays)
+				: null,
+		};
 
 		try {
 			if (whatsAppId) {
@@ -104,6 +131,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	const handleClose = () => {
 		onClose();
 		setWhatsApp(initialState);
+		setSelectedQueueIds([]);
 	};
 
 	return (
@@ -158,6 +186,49 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										label={i18n.t("whatsappModal.form.default")}
 									/>
 								</div>
+								<div>
+									<FormControlLabel
+										control={
+											<Field
+												as={Switch}
+												color="primary"
+												name="importOldMessages"
+												checked={values.importOldMessages}
+											/>
+										}
+										label={i18n.t("connections.importOldMessages")}
+									/>
+								</div>
+								{values.importOldMessages && (
+									<div>
+										<Field
+											as={TextField}
+											label={i18n.t("connections.importOldMessagesDays")}
+											name="importOldMessagesDays"
+											type="number"
+											fullWidth
+											variant="outlined"
+											margin="dense"
+											inputProps={{ min: 1, max: 90 }}
+											placeholder="20"
+											error={
+												touched.importOldMessagesDays &&
+												Boolean(errors.importOldMessagesDays)
+											}
+											helperText={
+												touched.importOldMessagesDays &&
+												errors.importOldMessagesDays
+													? i18n.t(errors.importOldMessagesDays)
+													: i18n.t("connections.importOldMessagesHelp")
+											}
+										/>
+									</div>
+								)}
+								{values.importOldMessages && (
+									<Typography variant="body2" color="textSecondary">
+										{i18n.t("connections.importOldMessagesHelp")}
+									</Typography>
+								)}
 								<div>
 									<Field
 										as={TextField}

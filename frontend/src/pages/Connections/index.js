@@ -16,6 +16,11 @@ import {
 	Tooltip,
 	Typography,
 	CircularProgress,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	TextField,
 } from "@material-ui/core";
 import {
 	Edit,
@@ -39,6 +44,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import QrcodeModal from "../../components/QrcodeModal";
 import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles(theme => ({
@@ -65,6 +71,19 @@ const useStyles = makeStyles(theme => ({
 	},
 	buttonProgress: {
 		color: green[500],
+	},
+	importStatusCell: {
+		minWidth: 220,
+	},
+	importStatusText: {
+		fontWeight: 500,
+	},
+	importMetaText: {
+		display: "block",
+		marginTop: theme.spacing(0.5),
+	},
+	importActionButton: {
+		marginTop: theme.spacing(1),
 	},
 }));
 
@@ -96,10 +115,14 @@ const Connections = () => {
 	const classes = useStyles();
 
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
+	const { user } = useContext(AuthContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
 	const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
 	const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+	const [importModalOpen, setImportModalOpen] = useState(false);
+	const [importDays, setImportDays] = useState(20);
+	const [syncingImport, setSyncingImport] = useState(false);
 	const confirmationModalInitialState = {
 		action: "",
 		title: "",
@@ -110,6 +133,7 @@ const Connections = () => {
 	const [confirmModalInfo, setConfirmModalInfo] = useState(
 		confirmationModalInitialState
 	);
+	const isAdmin = user?.profile === "admin";
 
 	const handleStartWhatsAppSession = async whatsAppId => {
 		try {
@@ -152,6 +176,18 @@ const Connections = () => {
 		setWhatsAppModalOpen(true);
 	};
 
+	const handleOpenImportModal = whatsApp => {
+		setSelectedWhatsApp(whatsApp);
+		setImportDays(whatsApp.importOldMessagesDays || 20);
+		setImportModalOpen(true);
+	};
+
+	const handleCloseImportModal = () => {
+		setImportModalOpen(false);
+		setSelectedWhatsApp(null);
+		setImportDays(20);
+	};
+
 	const handleOpenConfirmationModal = (action, whatsAppId) => {
 		if (action === "disconnect") {
 			setConfirmModalInfo({
@@ -192,6 +228,108 @@ const Connections = () => {
 		}
 
 		setConfirmModalInfo(confirmationModalInitialState);
+	};
+
+	const handleStartOldMessagesImport = async () => {
+		const normalizedDays = Number(importDays);
+
+		if (!Number.isInteger(normalizedDays) || normalizedDays < 1 || normalizedDays > 90) {
+			toast.error(i18n.t("connections.importOldMessagesValidationDays"));
+			return;
+		}
+
+		try {
+			setSyncingImport(true);
+			await api.post(
+				`/whatsapp/${selectedWhatsApp.id}/import-old-messages`,
+				{ days: normalizedDays }
+			);
+			toast.success(i18n.t("connections.importOldMessagesStarted"));
+			handleCloseImportModal();
+		} catch (err) {
+			toastError(err);
+		} finally {
+			setSyncingImport(false);
+		}
+	};
+
+	const getImportStatusLabel = whatsApp => {
+		const status = whatsApp.oldMessagesImportStatus || "idle";
+
+		if (status === "running") {
+			return i18n.t("connections.importOldMessagesRunning");
+		}
+
+		if (status === "pending") {
+			return i18n.t("connections.importOldMessagesPending");
+		}
+
+		if (status === "done") {
+			return i18n.t("connections.importOldMessagesDone");
+		}
+
+		if (status === "failed") {
+			return i18n.t("connections.importOldMessagesFailed");
+		}
+
+		return i18n.t("connections.importOldMessagesIdle");
+	};
+
+	const getImportErrorMessage = errorCode => {
+		if (!errorCode) {
+			return "";
+		}
+
+		if (i18n.exists(`backendErrors.${errorCode}`)) {
+			return i18n.t(`backendErrors.${errorCode}`);
+		}
+
+		return errorCode;
+	};
+
+	const renderImportStatus = whatsApp => {
+		const isRunning = whatsApp.oldMessagesImportStatus === "running";
+		const canTriggerNow = whatsApp.status === "CONNECTED" && !isRunning;
+		const lastImportAt = whatsApp.lastOldMessagesImportAt
+			? format(parseISO(whatsApp.lastOldMessagesImportAt), "dd/MM/yy HH:mm")
+			: null;
+
+		return (
+			<div className={classes.importStatusCell}>
+				<Typography variant="body2" className={classes.importStatusText}>
+					{getImportStatusLabel(whatsApp)}
+				</Typography>
+				{whatsApp.importOldMessagesDays ? (
+					<Typography variant="caption" color="textSecondary" className={classes.importMetaText}>
+						{i18n.t("connections.importOldMessagesDays")}: {whatsApp.importOldMessagesDays}
+					</Typography>
+				) : null}
+				{lastImportAt ? (
+					<Typography variant="caption" color="textSecondary" className={classes.importMetaText}>
+						{i18n.t("connections.importOldMessagesLastRun")}: {lastImportAt}
+					</Typography>
+				) : null}
+				{whatsApp.oldMessagesImportStatus === "failed" && whatsApp.oldMessagesImportError ? (
+					<Typography variant="caption" color="error" className={classes.importMetaText}>
+						{getImportErrorMessage(whatsApp.oldMessagesImportError)}
+					</Typography>
+				) : null}
+				{isAdmin ? (
+					<Button
+						size="small"
+						variant="outlined"
+						color="primary"
+						disabled={!canTriggerNow}
+						onClick={() => handleOpenImportModal(whatsApp)}
+						className={classes.importActionButton}
+					>
+						{isRunning
+							? i18n.t("connections.importOldMessagesRunning")
+							: i18n.t("connections.importOldMessagesNow")}
+					</Button>
+				) : null}
+			</div>
+		);
 	};
 
 	const renderActionButtons = whatsApp => {
@@ -309,6 +447,44 @@ const Connections = () => {
 				onClose={handleCloseWhatsAppModal}
 				whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
 			/>
+			<Dialog
+				open={importModalOpen}
+				onClose={handleCloseImportModal}
+				maxWidth="xs"
+				fullWidth
+			>
+				<DialogTitle>{i18n.t("connections.importOldMessagesNow")}</DialogTitle>
+				<DialogContent>
+					<TextField
+						autoFocus
+						fullWidth
+						type="number"
+						variant="outlined"
+						margin="dense"
+						label={i18n.t("connections.importOldMessagesDays")}
+						value={importDays}
+						onChange={event => setImportDays(event.target.value)}
+						inputProps={{ min: 1, max: 90 }}
+						placeholder="20"
+						helperText={i18n.t("connections.importOldMessagesHelp")}
+					/>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleCloseImportModal} color="secondary" variant="outlined">
+						{i18n.t("confirmationModal.buttons.cancel")}
+					</Button>
+					<Button
+						onClick={handleStartOldMessagesImport}
+						color="primary"
+						variant="contained"
+						disabled={syncingImport}
+					>
+						{syncingImport
+							? i18n.t("connections.importOldMessagesRunning")
+							: i18n.t("connections.importOldMessagesNow")}
+					</Button>
+				</DialogActions>
+			</Dialog>
 			<MainHeader>
 				<Title>{i18n.t("connections.title")}</Title>
 				<MainHeaderButtonsWrapper>
@@ -341,6 +517,9 @@ const Connections = () => {
 								{i18n.t("connections.table.default")}
 							</TableCell>
 							<TableCell align="center">
+								{i18n.t("connections.importOldMessagesStatus")}
+							</TableCell>
+							<TableCell align="center">
 								{i18n.t("connections.table.actions")}
 							</TableCell>
 						</TableRow>
@@ -369,6 +548,9 @@ const Connections = () => {
 														<CheckCircle style={{ color: green[500] }} />
 													</div>
 												)}
+											</TableCell>
+											<TableCell align="center">
+												{renderImportStatus(whatsApp)}
 											</TableCell>
 											<TableCell align="center">
 												<IconButton

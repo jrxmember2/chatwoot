@@ -11,6 +11,8 @@ interface Request {
   farewellMessage?: string;
   status?: string;
   isDefault?: boolean;
+  importOldMessages?: boolean;
+  importOldMessagesDays?: number | null;
 }
 
 interface Response {
@@ -24,7 +26,9 @@ const CreateWhatsAppService = async ({
   queueIds = [],
   greetingMessage,
   farewellMessage,
-  isDefault = false
+  isDefault = false,
+  importOldMessages = false,
+  importOldMessagesDays = null
 }: Request): Promise<Response> => {
   const schema = Yup.object().shape({
     name: Yup.string()
@@ -41,11 +45,25 @@ const CreateWhatsAppService = async ({
           return !nameExists;
         }
       ),
-    isDefault: Yup.boolean().required()
+    isDefault: Yup.boolean().required(),
+    importOldMessages: Yup.boolean().required(),
+    importOldMessagesDays: Yup.number()
+      .nullable()
+      .when("importOldMessages", {
+        is: true,
+        then: Yup.number().required().integer().min(1).max(90),
+        otherwise: Yup.number().nullable()
+      })
   });
 
   try {
-    await schema.validate({ name, status, isDefault });
+    await schema.validate({
+      name,
+      status,
+      isDefault,
+      importOldMessages,
+      importOldMessagesDays
+    });
   } catch (err) {
     throw new AppError(err.message);
   }
@@ -75,7 +93,11 @@ const CreateWhatsAppService = async ({
       status,
       greetingMessage,
       farewellMessage,
-      isDefault
+      isDefault,
+      importOldMessages,
+      importOldMessagesDays: importOldMessages ? importOldMessagesDays : null,
+      oldMessagesImportStatus: importOldMessages ? "pending" : "idle",
+      oldMessagesImportError: null
     },
     { include: ["queues"] }
   );

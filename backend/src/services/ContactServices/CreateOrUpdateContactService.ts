@@ -16,6 +16,7 @@ interface Request {
   email?: string;
   profilePicUrl?: string;
   extraInfo?: ExtraInfo[];
+  skipSocketEmit?: boolean;
 }
 
 const emitContact = (action: "update" | "create", contact: Contact) => {
@@ -31,7 +32,8 @@ const CreateOrUpdateContactService = async ({
   profilePicUrl,
   isGroup,
   email = "",
-  extraInfo = []
+  extraInfo = [],
+  skipSocketEmit = false
 }: Request): Promise<Contact> => {
   const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
   if (!number && !lid) throw new Error("Either number or lid must be provided");
@@ -63,7 +65,9 @@ const CreateOrUpdateContactService = async ({
       mergedContactId: contactByLid.id
     });
 
-    emitContact("update", contactByNumber);
+    if (!skipSocketEmit) {
+      emitContact("update", contactByNumber);
+    }
 
     return contactByNumber;
   }
@@ -74,7 +78,9 @@ const CreateOrUpdateContactService = async ({
       profilePicUrl
     });
 
-    emitContact("update", contactByNumber);
+    if (!skipSocketEmit) {
+      emitContact("update", contactByNumber);
+    }
 
     return contactByNumber;
   }
@@ -85,7 +91,9 @@ const CreateOrUpdateContactService = async ({
       profilePicUrl
     });
 
-    emitContact("update", contactByLid);
+    if (!skipSocketEmit) {
+      emitContact("update", contactByLid);
+    }
     return contactByLid;
   }
 
@@ -99,7 +107,9 @@ const CreateOrUpdateContactService = async ({
     extraInfo
   });
 
-  emitContact("create", created);
+  if (!skipSocketEmit) {
+    emitContact("create", created);
+  }
   return created;
 };
 

@@ -16,6 +16,7 @@ import {
 import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
+import WhatsAppHistoryImport from "./WhatsAppHistoryImport";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -54,6 +55,23 @@ class Whatsapp extends Model<Whatsapp> {
   farewellMessage: string;
 
   @Default(false)
+  @Column
+  importOldMessages: boolean;
+
+  @Column(DataType.INTEGER)
+  importOldMessagesDays: number | null;
+
+  @Column(DataType.DATE(6))
+  lastOldMessagesImportAt: Date | null;
+
+  @Default("idle")
+  @Column(DataType.STRING)
+  oldMessagesImportStatus: string;
+
+  @Column(DataType.TEXT)
+  oldMessagesImportError: string | null;
+
+  @Default(false)
   @AllowNull
   @Column
   isDefault: boolean;
@@ -72,6 +90,9 @@ class Whatsapp extends Model<Whatsapp> {
 
   @HasMany(() => WhatsappQueue)
   whatsappQueues: WhatsappQueue[];
+
+  @HasMany(() => WhatsAppHistoryImport)
+  historyImports: WhatsAppHistoryImport[];
 }
 
 export default Whatsapp;

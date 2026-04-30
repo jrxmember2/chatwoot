@@ -14,6 +14,8 @@ interface WhatsappData {
   greetingMessage?: string;
   farewellMessage?: string;
   queueIds?: number[];
+  importOldMessages?: boolean;
+  importOldMessagesDays?: number | null;
 }
 
 interface Request {
@@ -43,7 +45,9 @@ const UpdateWhatsAppService = async ({
     session,
     greetingMessage,
     farewellMessage,
-    queueIds = []
+    queueIds = [],
+    importOldMessages,
+    importOldMessagesDays
   } = whatsappData;
 
   try {
@@ -68,6 +72,38 @@ const UpdateWhatsAppService = async ({
   }
 
   const whatsapp = await ShowWhatsAppService(whatsappId);
+  let nextImportOldMessagesStatus = whatsapp.oldMessagesImportStatus;
+  let nextImportOldMessagesError = whatsapp.oldMessagesImportError;
+  let nextImportOldMessagesDays = whatsapp.importOldMessagesDays;
+
+  if (importOldMessages !== undefined) {
+    if (importOldMessages) {
+      const normalizedDays = Number(importOldMessagesDays);
+
+      if (
+        !Number.isInteger(normalizedDays) ||
+        normalizedDays < 1 ||
+        normalizedDays > 90
+      ) {
+        throw new AppError("ERR_OLD_MESSAGES_IMPORT_INVALID_DAYS");
+      }
+
+      const shouldResetImportStatus =
+        !whatsapp.importOldMessages ||
+        whatsapp.importOldMessagesDays !== normalizedDays;
+
+      nextImportOldMessagesDays = normalizedDays;
+
+      if (whatsapp.oldMessagesImportStatus !== "running" && shouldResetImportStatus) {
+        nextImportOldMessagesStatus = "pending";
+        nextImportOldMessagesError = null;
+      }
+    } else {
+      nextImportOldMessagesDays = null;
+      nextImportOldMessagesStatus = "idle";
+      nextImportOldMessagesError = null;
+    }
+  }
 
   await whatsapp.update({
     name,
@@ -75,7 +111,11 @@ const UpdateWhatsAppService = async ({
     session,
     greetingMessage,
     farewellMessage,
-    isDefault
+    isDefault,
+    importOldMessages,
+    importOldMessagesDays: nextImportOldMessagesDays,
+    oldMessagesImportStatus: nextImportOldMessagesStatus,
+    oldMessagesImportError: nextImportOldMessagesError
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);

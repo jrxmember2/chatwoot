@@ -13,6 +13,7 @@ import QuickAnswer from "../models/QuickAnswer";
 import WppKey from "../models/WppKey";
 import ScheduledMessage from "../models/ScheduledMessage";
 import BrandingSetting from "../models/BrandingSetting";
+import WhatsAppHistoryImport from "../models/WhatsAppHistoryImport";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -34,7 +35,8 @@ const models = [
   QuickAnswer,
   WppKey,
   ScheduledMessage,
-  BrandingSetting
+  BrandingSetting,
+  WhatsAppHistoryImport
 ];
 
 sequelize.addModels(models);
