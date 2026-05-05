@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
+import EmitIntegrationEventService from "../IntegrationServices/EmitIntegrationEventService";
 
 const FindOrCreateTicketService = async (
   contact: Contact,
@@ -10,6 +11,7 @@ const FindOrCreateTicketService = async (
   unreadMessages: number,
   groupContact?: Contact
 ): Promise<Ticket> => {
+  let createdTicket = false;
   let ticket = await Ticket.findOne({
     where: {
       status: {
@@ -71,9 +73,24 @@ const FindOrCreateTicketService = async (
       unreadMessages,
       whatsappId
     });
+    createdTicket = true;
   }
 
   ticket = await ShowTicketService(ticket.id);
+
+  if (createdTicket) {
+    EmitIntegrationEventService({
+      event: "ticket_created",
+      payload: {
+        id: ticket.id,
+        status: ticket.status,
+        whatsappId: ticket.whatsappId,
+        contactId: ticket.contactId,
+        queueId: ticket.queueId,
+        isGroup: ticket.isGroup
+      }
+    });
+  }
 
   return ticket;
 };

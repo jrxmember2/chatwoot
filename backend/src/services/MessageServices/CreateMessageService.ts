@@ -2,6 +2,7 @@ import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
+import EmitIntegrationEventService from "../IntegrationServices/EmitIntegrationEventService";
 
 interface MessageData {
   id: string;
@@ -57,6 +58,19 @@ const CreateMessageService = async ({
   }
 
   if (skipSocketEmit) {
+    EmitIntegrationEventService({
+      event: message.fromMe ? "message_sent" : "message_received",
+      payload: {
+        id: message.id,
+        ticketId: message.ticketId,
+        contactId: message.contactId,
+        body: message.body,
+        fromMe: message.fromMe,
+        mediaType: message.mediaType,
+        whatsappId: message.ticket?.whatsappId
+      }
+    });
+
     return message;
   }
 
@@ -70,6 +84,19 @@ const CreateMessageService = async ({
       ticket: message.ticket,
       contact: message.ticket.contact
     });
+
+  EmitIntegrationEventService({
+    event: message.fromMe ? "message_sent" : "message_received",
+    payload: {
+      id: message.id,
+      ticketId: message.ticketId,
+      contactId: message.contactId,
+      body: message.body,
+      fromMe: message.fromMe,
+      mediaType: message.mediaType,
+      whatsappId: message.ticket?.whatsappId
+    }
+  });
 
   return message;
 };

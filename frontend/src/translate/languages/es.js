@@ -580,5 +580,226 @@ messages.es.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_ALREADY_RUNNING =
   "Ya existe una sincronizacion en curso para esta conexion.";
 messages.es.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_UNSUPPORTED =
   "La sincronizacion de mensajes antiguos esta disponible solo para conexiones wwebjs.";
+messages.es.translations.mainDrawer.listItems.campaignsGroup = "Campanas";
+messages.es.translations.mainDrawer.listItems.automationsGroup = "Automatizaciones";
+messages.es.translations.integrations = {
+  title: "Integraciones",
+  description: "Configura N8N, ChatGPT y Evolution API de forma segura.",
+  open: "Abrir Integraciones",
+  save: "Guardar",
+  saving: "Guardando...",
+  success: "Integraciones guardadas con exito.",
+  keepSecretHint: "Deja vacio para mantener el secreto actual.",
+  n8n: {
+    title: "N8N",
+    active: "Activar integracion con N8N",
+    baseUrl: "URL base de N8N",
+    webhookUrl: "Webhook por defecto",
+    secret: "Token o secret"
+  },
+  chatgpt: {
+    title: "ChatGPT",
+    active: "Activar ChatGPT",
+    apiKey: "API Key",
+    model: "Modelo",
+    basePrompt: "Prompt base",
+    temperature: "Temperatura",
+    maxTokens: "Limite de tokens",
+    queues: "Colas permitidas",
+    suggestReply: "Sugerir respuesta",
+    summarize: "Resumir conversacion",
+    summaryTitle: "Resumen de la conversacion"
+  },
+  evolution: {
+    title: "Evolution API",
+    active: "Activar Evolution API",
+    baseUrl: "URL base",
+    apiKey: "API Key",
+    instance: "Instancia por defecto",
+    useAsDefault: "Usar Evolution por defecto",
+    test: "Probar conexion",
+    testing: "Probando...",
+    testSuccess: "Conexion con Evolution validada correctamente."
+  }
+};
+messages.es.translations.webhooks = {
+  title: "Webhooks",
+  description: "Administra webhooks genericos y revisa los envios.",
+  open: "Abrir Webhooks",
+  add: "Nuevo webhook",
+  save: "Guardar",
+  cancel: "Cancelar",
+  close: "Cerrar",
+  success: "Webhook guardado con exito.",
+  deleted: "Webhook eliminado con exito.",
+  test: "Probar",
+  testSuccess: "Envio de prueba realizado.",
+  dialogTitle: "Webhook",
+  deleteConfirmTitle: "Eliminar webhook",
+  deleteConfirmMessage: "Deseas eliminar este webhook?",
+  logsTitle: "Logs del webhook",
+  fields: {
+    name: "Nombre",
+    url: "URL",
+    secret: "Secret",
+    events: "Eventos",
+    active: "Activo"
+  },
+  table: {
+    name: "Nombre",
+    url: "URL",
+    events: "Eventos",
+    status: "Ultimo estado",
+    actions: "Acciones"
+  },
+  logs: {
+    event: "Evento",
+    status: "Estado",
+    error: "Error"
+  },
+  events: {
+    ticket_created: "Ticket creado",
+    ticket_updated: "Ticket actualizado",
+    ticket_closed: "Ticket cerrado",
+    message_received: "Mensaje recibido",
+    message_sent: "Mensaje enviado",
+    contact_created: "Contacto creado",
+    whatsapp_connected: "WhatsApp conectado",
+    whatsapp_disconnected: "WhatsApp desconectado",
+    campaign_sent: "Campana enviada"
+  }
+};
+messages.es.translations.campaigns = {
+  title: "Campanas",
+  add: "Nueva campana",
+  newCampaign: "Crear campana",
+  save: "Guardar campana",
+  saving: "Guardando...",
+  cancel: "Cancelar",
+  success: "Campana creada con exito.",
+  canceled: "Campana cancelada con exito.",
+  failed: "fallos",
+  cancelTitle: "Cancelar campana",
+  cancelMessage: "Deseas cancelar esta campana?",
+  limitInfo: "Puedes enviar a hasta {{count}} contactos en las proximas 24h.",
+  fields: {
+    name: "Nombre",
+    whatsapp: "Conexion WhatsApp",
+    message: "Mensaje",
+    scheduledAt: "Programar para",
+    file: "Adjunto",
+    contacts: "Contactos",
+    contactsPlaceholder: "Busca y selecciona contactos"
+  },
+  table: {
+    name: "Nombre",
+    whatsapp: "Conexion",
+    status: "Estado",
+    scheduledAt: "Programacion",
+    results: "Resultados",
+    actions: "Acciones"
+  }
+};
+messages.es.translations.flowbuilder = {
+  title: "Flowbuilder",
+  add: "Nuevo flujo",
+  save: "Guardar flujo",
+  cancel: "Cancelar",
+  success: "Flujo guardado con exito.",
+  deleted: "Flujo eliminado con exito.",
+  active: "Activo",
+  inactive: "Inactivo",
+  dialogTitle: "Flujo",
+  deleteTitle: "Eliminar flujo",
+  deleteMessage: "Deseas eliminar este flujo?",
+  nodesTitle: "Pasos del flujo",
+  addStep: "Agregar paso",
+  removeStep: "Eliminar paso",
+  noNextStep: "Sin siguiente paso",
+  step: "Paso",
+  fields: {
+    name: "Nombre",
+    description: "Descripcion",
+    keyword: "Palabra clave",
+    active: "Flujo activo",
+    nodeLabel: "Titulo del paso",
+    nodeType: "Tipo de paso",
+    message: "Mensaje",
+    conditionValue: "Texto a verificar",
+    queue: "Cola",
+    webhookUrl: "URL del webhook",
+    nextStep: "Siguiente paso",
+    trueNext: "Si es verdadero",
+    falseNext: "Si es falso"
+  },
+  nodeTypes: {
+    send_message: "Enviar mensaje",
+    condition_contains: "Condicion: contiene texto",
+    transfer_queue: "Transferir a cola",
+    close_ticket: "Cerrar ticket",
+    webhook: "Webhook"
+  },
+  table: {
+    name: "Nombre",
+    keyword: "Palabra clave",
+    active: "Activo",
+    steps: "Pasos",
+    actions: "Acciones"
+  }
+};
+messages.es.translations.backendErrors.ERR_WEBHOOK_INVALID_URL =
+  "Ingresa una URL valida para el webhook.";
+messages.es.translations.backendErrors.ERR_WEBHOOK_INVALID_PAYLOAD =
+  "Completa nombre, URL y al menos un evento para el webhook.";
+messages.es.translations.backendErrors.ERR_NO_WEBHOOK_FOUND =
+  "No se encontro un webhook con este ID.";
+messages.es.translations.backendErrors.ERR_INTEGRATION_INVALID_URL =
+  "Ingresa una URL valida para la integracion.";
+messages.es.translations.backendErrors.ERR_CHATGPT_NOT_CONFIGURED =
+  "Configura y activa ChatGPT antes de usar esta funcion.";
+messages.es.translations.backendErrors.ERR_CHATGPT_QUEUE_NOT_ALLOWED =
+  "La cola de este ticket no esta habilitada para ChatGPT.";
+messages.es.translations.backendErrors.ERR_CHATGPT_REQUEST_FAILED =
+  "No fue posible obtener respuesta de ChatGPT.";
+messages.es.translations.backendErrors.ERR_CHATGPT_EMPTY_RESPONSE =
+  "ChatGPT no devolvio contenido util.";
+messages.es.translations.backendErrors.ERR_CHATGPT_INVALID_TEMPERATURE =
+  "Ingresa una temperatura entre 0 y 2.";
+messages.es.translations.backendErrors.ERR_CHATGPT_INVALID_MAX_TOKENS =
+  "Ingresa un limite de tokens entre 100 y 4000.";
+messages.es.translations.backendErrors.ERR_EVOLUTION_INVALID_URL =
+  "Ingresa una URL valida para Evolution API.";
+messages.es.translations.backendErrors.ERR_EVOLUTION_TEST_FAILED =
+  "No se pudo validar la conexion con Evolution API.";
+messages.es.translations.backendErrors.ERR_INVALID_CAMPAIGN_MEDIA_TYPE =
+  "Adjunta solo imagenes, PDF, audio, video o documentos comunes en la campana.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_NAME_REQUIRED =
+  "Ingresa el nombre de la campana.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_EMPTY =
+  "Ingresa un mensaje o adjunta un archivo para la campana.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_CONTACTS_REQUIRED =
+  "Selecciona al menos un contacto para la campana.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_PAST_DATE =
+  "No es posible programar una campana en el pasado.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_LIMIT_EXCEEDED =
+  "La campana supera el limite de 50 contactos por 24h para esta conexion.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_INVALID_CONTACTS =
+  "Algunos contactos seleccionados ya no existen.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_CREATE_FAILED =
+  "No fue posible crear la campana.";
+messages.es.translations.backendErrors.ERR_NO_CAMPAIGN_FOUND =
+  "No se encontro una campana con este ID.";
+messages.es.translations.backendErrors.ERR_CAMPAIGN_CANCEL_NOT_ALLOWED =
+  "Solo las campanas borrador, programadas o procesando pueden cancelarse.";
+messages.es.translations.backendErrors.ERR_FLOW_NAME_REQUIRED =
+  "Ingresa el nombre del flujo.";
+messages.es.translations.backendErrors.ERR_FLOW_NODES_REQUIRED =
+  "Agrega al menos un paso al flujo.";
+messages.es.translations.backendErrors.ERR_FLOW_KEYWORD_REQUIRED =
+  "Ingresa la palabra clave del disparador.";
+messages.es.translations.backendErrors.ERR_FLOW_INVALID_NODE =
+  "El flujo contiene un tipo de paso invalido.";
+messages.es.translations.backendErrors.ERR_NO_FLOW_FOUND =
+  "No se encontro un flujo con este ID.";
 
 export { messages };

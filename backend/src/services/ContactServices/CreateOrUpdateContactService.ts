@@ -2,6 +2,7 @@ import { getIO } from "../../libs/socket";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import { logger } from "../../utils/logger";
+import EmitIntegrationEventService from "../IntegrationServices/EmitIntegrationEventService";
 
 interface ExtraInfo {
   name: string;
@@ -110,6 +111,18 @@ const CreateOrUpdateContactService = async ({
   if (!skipSocketEmit) {
     emitContact("create", created);
   }
+
+  EmitIntegrationEventService({
+    event: "contact_created",
+    payload: {
+      id: created.id,
+      name: created.name,
+      number: created.number,
+      lid: created.lid,
+      isGroup: created.isGroup
+    }
+  });
+
   return created;
 };
 

@@ -18,6 +18,7 @@ import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTi
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import CreateContactService from "../services/ContactServices/CreateContactService";
+import ExecuteIncomingMessageFlowsService from "../services/FlowbuilderServices/ExecuteIncomingMessageFlowsService";
 
 import { whatsappProvider } from "../providers/WhatsApp/whatsappProvider";
 import { MessageType, MessageAck } from "../providers/WhatsApp/types";
@@ -291,9 +292,19 @@ export const handleMessage = async (
 
     await CreateMessageService({ messageData });
 
+    const flowHandled =
+      !processedMessage.fromMe && !contextPayload.groupContact
+        ? await ExecuteIncomingMessageFlowsService({
+            ticket,
+            contact,
+            message: processedMessage
+          })
+        : false;
+
     await processVcardMessage(processedMessage);
 
     if (
+      !flowHandled &&
       !ticket.queue &&
       !contextPayload.groupContact &&
       !processedMessage.fromMe &&

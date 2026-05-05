@@ -572,5 +572,226 @@ messages.en.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_ALREADY_RUNNING =
   "There is already a sync running for this connection.";
 messages.en.translations.backendErrors.ERR_OLD_MESSAGES_IMPORT_UNSUPPORTED =
   "Old messages sync is currently available only for wwebjs connections.";
+messages.en.translations.mainDrawer.listItems.campaignsGroup = "Campaigns";
+messages.en.translations.mainDrawer.listItems.automationsGroup = "Automations";
+messages.en.translations.integrations = {
+  title: "Integrations",
+  description: "Configure N8N, ChatGPT and Evolution API safely.",
+  open: "Open Integrations",
+  save: "Save",
+  saving: "Saving...",
+  success: "Integrations saved successfully.",
+  keepSecretHint: "Leave blank to keep the current secret.",
+  n8n: {
+    title: "N8N",
+    active: "Enable N8N integration",
+    baseUrl: "N8N base URL",
+    webhookUrl: "Default webhook URL",
+    secret: "Token or secret"
+  },
+  chatgpt: {
+    title: "ChatGPT",
+    active: "Enable ChatGPT",
+    apiKey: "API Key",
+    model: "Model",
+    basePrompt: "Base prompt",
+    temperature: "Temperature",
+    maxTokens: "Max tokens",
+    queues: "Allowed queues",
+    suggestReply: "Suggest reply",
+    summarize: "Summarize ticket",
+    summaryTitle: "Conversation summary"
+  },
+  evolution: {
+    title: "Evolution API",
+    active: "Enable Evolution API",
+    baseUrl: "Base URL",
+    apiKey: "API Key",
+    instance: "Default instance",
+    useAsDefault: "Use Evolution as default",
+    test: "Test connection",
+    testing: "Testing...",
+    testSuccess: "Evolution connection validated successfully."
+  }
+};
+messages.en.translations.webhooks = {
+  title: "Webhooks",
+  description: "Manage generic webhooks and monitor deliveries.",
+  open: "Open Webhooks",
+  add: "New webhook",
+  save: "Save",
+  cancel: "Cancel",
+  close: "Close",
+  success: "Webhook saved successfully.",
+  deleted: "Webhook removed successfully.",
+  test: "Test",
+  testSuccess: "Test delivery sent successfully.",
+  dialogTitle: "Webhook",
+  deleteConfirmTitle: "Remove webhook",
+  deleteConfirmMessage: "Do you really want to remove this webhook?",
+  logsTitle: "Webhook logs",
+  fields: {
+    name: "Name",
+    url: "URL",
+    secret: "Secret",
+    events: "Events",
+    active: "Active"
+  },
+  table: {
+    name: "Name",
+    url: "URL",
+    events: "Events",
+    status: "Last status",
+    actions: "Actions"
+  },
+  logs: {
+    event: "Event",
+    status: "Status",
+    error: "Error"
+  },
+  events: {
+    ticket_created: "Ticket created",
+    ticket_updated: "Ticket updated",
+    ticket_closed: "Ticket closed",
+    message_received: "Message received",
+    message_sent: "Message sent",
+    contact_created: "Contact created",
+    whatsapp_connected: "WhatsApp connected",
+    whatsapp_disconnected: "WhatsApp disconnected",
+    campaign_sent: "Campaign sent"
+  }
+};
+messages.en.translations.campaigns = {
+  title: "Campaigns",
+  add: "New campaign",
+  newCampaign: "Create campaign",
+  save: "Save campaign",
+  saving: "Saving...",
+  cancel: "Cancel",
+  success: "Campaign created successfully.",
+  canceled: "Campaign canceled successfully.",
+  failed: "failures",
+  cancelTitle: "Cancel campaign",
+  cancelMessage: "Do you want to cancel this campaign?",
+  limitInfo: "You can send to up to {{count}} contacts in the next 24h.",
+  fields: {
+    name: "Name",
+    whatsapp: "WhatsApp connection",
+    message: "Message",
+    scheduledAt: "Schedule at",
+    file: "Attachment",
+    contacts: "Contacts",
+    contactsPlaceholder: "Search and select contacts"
+  },
+  table: {
+    name: "Name",
+    whatsapp: "Connection",
+    status: "Status",
+    scheduledAt: "Schedule",
+    results: "Results",
+    actions: "Actions"
+  }
+};
+messages.en.translations.flowbuilder = {
+  title: "Flowbuilder",
+  add: "New flow",
+  save: "Save flow",
+  cancel: "Cancel",
+  success: "Flow saved successfully.",
+  deleted: "Flow removed successfully.",
+  active: "Active",
+  inactive: "Inactive",
+  dialogTitle: "Flow",
+  deleteTitle: "Remove flow",
+  deleteMessage: "Do you really want to remove this flow?",
+  nodesTitle: "Flow steps",
+  addStep: "Add step",
+  removeStep: "Remove step",
+  noNextStep: "No next step",
+  step: "Step",
+  fields: {
+    name: "Name",
+    description: "Description",
+    keyword: "Keyword",
+    active: "Flow active",
+    nodeLabel: "Step title",
+    nodeType: "Step type",
+    message: "Message",
+    conditionValue: "Text to match",
+    queue: "Queue",
+    webhookUrl: "Webhook URL",
+    nextStep: "Next step",
+    trueNext: "If true",
+    falseNext: "If false"
+  },
+  nodeTypes: {
+    send_message: "Send message",
+    condition_contains: "Condition: contains text",
+    transfer_queue: "Transfer to queue",
+    close_ticket: "Close ticket",
+    webhook: "Webhook"
+  },
+  table: {
+    name: "Name",
+    keyword: "Keyword",
+    active: "Active",
+    steps: "Steps",
+    actions: "Actions"
+  }
+};
+messages.en.translations.backendErrors.ERR_WEBHOOK_INVALID_URL =
+  "Provide a valid webhook URL.";
+messages.en.translations.backendErrors.ERR_WEBHOOK_INVALID_PAYLOAD =
+  "Provide name, URL and at least one event for the webhook.";
+messages.en.translations.backendErrors.ERR_NO_WEBHOOK_FOUND =
+  "No webhook found with this ID.";
+messages.en.translations.backendErrors.ERR_INTEGRATION_INVALID_URL =
+  "Provide a valid integration URL.";
+messages.en.translations.backendErrors.ERR_CHATGPT_NOT_CONFIGURED =
+  "Configure and enable ChatGPT integration before using this feature.";
+messages.en.translations.backendErrors.ERR_CHATGPT_QUEUE_NOT_ALLOWED =
+  "This ticket queue is not allowed for ChatGPT.";
+messages.en.translations.backendErrors.ERR_CHATGPT_REQUEST_FAILED =
+  "Could not get a response from ChatGPT.";
+messages.en.translations.backendErrors.ERR_CHATGPT_EMPTY_RESPONSE =
+  "ChatGPT returned no usable content.";
+messages.en.translations.backendErrors.ERR_CHATGPT_INVALID_TEMPERATURE =
+  "Provide a temperature between 0 and 2.";
+messages.en.translations.backendErrors.ERR_CHATGPT_INVALID_MAX_TOKENS =
+  "Provide a max token value between 100 and 4000.";
+messages.en.translations.backendErrors.ERR_EVOLUTION_INVALID_URL =
+  "Provide a valid Evolution API URL.";
+messages.en.translations.backendErrors.ERR_EVOLUTION_TEST_FAILED =
+  "Failed to validate Evolution API connection.";
+messages.en.translations.backendErrors.ERR_INVALID_CAMPAIGN_MEDIA_TYPE =
+  "Attach only images, PDF, audio, video or common documents in campaigns.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_NAME_REQUIRED =
+  "Provide the campaign name.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_EMPTY =
+  "Provide a message or attach a file for the campaign.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_CONTACTS_REQUIRED =
+  "Select at least one contact for the campaign.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_PAST_DATE =
+  "You cannot schedule a campaign in the past.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_LIMIT_EXCEEDED =
+  "The campaign exceeds the 50 contacts per 24h limit for this connection.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_INVALID_CONTACTS =
+  "Some selected contacts no longer exist.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_CREATE_FAILED =
+  "Could not create the campaign.";
+messages.en.translations.backendErrors.ERR_NO_CAMPAIGN_FOUND =
+  "No campaign found with this ID.";
+messages.en.translations.backendErrors.ERR_CAMPAIGN_CANCEL_NOT_ALLOWED =
+  "Only draft, scheduled or processing campaigns can be canceled.";
+messages.en.translations.backendErrors.ERR_FLOW_NAME_REQUIRED =
+  "Provide the flow name.";
+messages.en.translations.backendErrors.ERR_FLOW_NODES_REQUIRED =
+  "Add at least one step to the flow.";
+messages.en.translations.backendErrors.ERR_FLOW_KEYWORD_REQUIRED =
+  "Provide the trigger keyword.";
+messages.en.translations.backendErrors.ERR_FLOW_INVALID_NODE =
+  "The flow contains an invalid step type.";
+messages.en.translations.backendErrors.ERR_NO_FLOW_FOUND =
+  "No flow found with this ID.";
 
 export { messages };

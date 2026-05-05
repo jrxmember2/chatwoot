@@ -20,6 +20,11 @@ import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   Hidden,
   Menu,
@@ -226,6 +231,9 @@ const MessageInput = ({ ticketStatus }) => {
   const [typeBar, setTypeBar] = useState(false);
   const inputRef = useRef();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summaryText, setSummaryText] = useState("");
   const { setReplyingMessage, replyingMessage } =
     useContext(ReplyMessageContext);
   const { user } = useContext(AuthContext);
@@ -408,6 +416,37 @@ const MessageInput = ({ ticketStatus }) => {
     setAnchorEl(null);
   };
 
+  const handleSuggestReply = async () => {
+    try {
+      setAiLoading(true);
+      const { data } = await api.post("/chatgpt/suggest-reply", {
+        ticketId
+      });
+      setInputMessage(data.suggestion || "");
+      setAnchorEl(null);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleSummarizeTicket = async () => {
+    try {
+      setAiLoading(true);
+      const { data } = await api.post("/chatgpt/summarize-ticket", {
+        ticketId
+      });
+      setSummaryText(data.summary || "");
+      setSummaryOpen(true);
+      setAnchorEl(null);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const renderReplyingMessage = message => {
     return (
       <div className={classes.replyginMsgWrapper}>
@@ -472,9 +511,41 @@ const MessageInput = ({ ticketStatus }) => {
   else {
     return (
       <Paper square elevation={0} className={classes.mainWrapper}>
+        <Dialog
+          open={summaryOpen}
+          onClose={() => setSummaryOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>{i18n.t("integrations.chatgpt.summaryTitle")}</DialogTitle>
+          <DialogContent dividers>
+            <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{summaryText}</p>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSummaryOpen(false)} color="primary" variant="outlined">
+              {i18n.t("webhooks.close")}
+            </Button>
+          </DialogActions>
+        </Dialog>
         {replyingMessage && renderReplyingMessage(replyingMessage)}
         <div className={classes.newMessageBox}>
           <Hidden only={["sm", "xs"]}>
+            <Button
+              size="small"
+              color="primary"
+              disabled={loading || recording || ticketStatus !== "open" || aiLoading}
+              onClick={handleSuggestReply}
+            >
+              {i18n.t("integrations.chatgpt.suggestReply")}
+            </Button>
+            <Button
+              size="small"
+              color="primary"
+              disabled={loading || recording || aiLoading}
+              onClick={handleSummarizeTicket}
+            >
+              {i18n.t("integrations.chatgpt.summarize")}
+            </Button>
             <IconButton
               aria-label="emojiPicker"
               component="span"
@@ -545,6 +616,26 @@ const MessageInput = ({ ticketStatus }) => {
               open={Boolean(anchorEl)}
               onClose={handleMenuItemClick}
             >
+              <MenuItem onClick={handleMenuItemClick}>
+                <Button
+                  size="small"
+                  color="primary"
+                  disabled={loading || recording || ticketStatus !== "open" || aiLoading}
+                  onClick={handleSuggestReply}
+                >
+                  {i18n.t("integrations.chatgpt.suggestReply")}
+                </Button>
+              </MenuItem>
+              <MenuItem onClick={handleMenuItemClick}>
+                <Button
+                  size="small"
+                  color="primary"
+                  disabled={loading || recording || aiLoading}
+                  onClick={handleSummarizeTicket}
+                >
+                  {i18n.t("integrations.chatgpt.summarize")}
+                </Button>
+              </MenuItem>
               <MenuItem onClick={handleMenuItemClick}>
                 <IconButton
                   aria-label="emojiPicker"

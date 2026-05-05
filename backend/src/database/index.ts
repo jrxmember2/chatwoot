@@ -14,6 +14,16 @@ import WppKey from "../models/WppKey";
 import ScheduledMessage from "../models/ScheduledMessage";
 import BrandingSetting from "../models/BrandingSetting";
 import WhatsAppHistoryImport from "../models/WhatsAppHistoryImport";
+import IntegrationSetting from "../models/IntegrationSetting";
+import Webhook from "../models/Webhook";
+import WebhookLog from "../models/WebhookLog";
+import Flow from "../models/Flow";
+import FlowNode from "../models/FlowNode";
+import FlowEdge from "../models/FlowEdge";
+import FlowExecutionLog from "../models/FlowExecutionLog";
+import Campaign from "../models/Campaign";
+import CampaignContact from "../models/CampaignContact";
+import CampaignDailyLimit from "../models/CampaignDailyLimit";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -36,7 +46,17 @@ const models = [
   WppKey,
   ScheduledMessage,
   BrandingSetting,
-  WhatsAppHistoryImport
+  WhatsAppHistoryImport,
+  IntegrationSetting,
+  Webhook,
+  WebhookLog,
+  Flow,
+  FlowNode,
+  FlowEdge,
+  FlowExecutionLog,
+  Campaign,
+  CampaignContact,
+  CampaignDailyLimit
 ];
 
 sequelize.addModels(models);

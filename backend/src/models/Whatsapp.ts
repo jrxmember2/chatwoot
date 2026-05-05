@@ -17,6 +17,7 @@ import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
 import WhatsAppHistoryImport from "./WhatsAppHistoryImport";
+import Campaign from "./Campaign";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -53,6 +54,19 @@ class Whatsapp extends Model<Whatsapp> {
 
   @Column(DataType.TEXT)
   farewellMessage: string;
+
+  @Default("wwebjs")
+  @Column(DataType.STRING)
+  provider: string;
+
+  @Column(DataType.STRING)
+  evolutionApiUrl: string | null;
+
+  @Column(DataType.TEXT)
+  evolutionApiKey: string | null;
+
+  @Column(DataType.STRING)
+  evolutionInstanceName: string | null;
 
   @Default(false)
   @Column
@@ -93,6 +107,9 @@ class Whatsapp extends Model<Whatsapp> {
 
   @HasMany(() => WhatsAppHistoryImport)
   historyImports: WhatsAppHistoryImport[];
+
+  @HasMany(() => Campaign)
+  campaigns: Campaign[];
 }
 
 export default Whatsapp;

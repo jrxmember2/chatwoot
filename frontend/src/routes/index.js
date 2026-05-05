@@ -10,6 +10,10 @@ import Login from "../pages/Login/";
 import Connections from "../pages/Connections/";
 import Settings from "../pages/Settings/";
 import Branding from "../pages/Branding/";
+import Integrations from "../pages/Integrations/";
+import Webhooks from "../pages/Webhooks/";
+import Campaigns from "../pages/Campaigns/";
+import Flowbuilder from "../pages/Flowbuilder/";
 import Users from "../pages/Users";
 import Contacts from "../pages/Contacts/";
 import QuickAnswers from "../pages/QuickAnswers/";
@@ -32,11 +36,15 @@ const Routes = () => {
                 <Route exact path="/" component={Dashboard} isPrivate />
                 <Route exact path="/tickets/:ticketId?" component={Tickets} isPrivate />
                 <Route exact path="/connections" component={Connections} isPrivate />
+                <Route exact path="/campaigns" component={Campaigns} isPrivate />
+                <Route exact path="/flows" component={Flowbuilder} isPrivate />
                 <Route exact path="/contacts" component={Contacts} isPrivate />
                 <Route exact path="/users" component={Users} isPrivate />
                 <Route exact path="/quickAnswers" component={QuickAnswers} isPrivate />
                 <Route exact path="/Settings" component={Settings} isPrivate />
                 <Route exact path="/branding" component={Branding} isPrivate />
+                <Route exact path="/integrations" component={Integrations} isPrivate />
+                <Route exact path="/webhooks" component={Webhooks} isPrivate />
                 <Route exact path="/Queues" component={Queues} isPrivate />
               </LoggedInLayout>
             </WhatsAppsProvider>

@@ -13,6 +13,12 @@ import quickAnswerRoutes from "./quickAnswerRoutes";
 import apiRoutes from "./apiRoutes";
 import scheduledMessageRoutes from "./scheduledMessageRoutes";
 import brandingRoutes from "./brandingRoutes";
+import integrationRoutes from "./integrationRoutes";
+import webhookRoutes from "./webhookRoutes";
+import chatgptRoutes from "./chatgptRoutes";
+import evolutionRoutes from "./evolutionRoutes";
+import campaignRoutes from "./campaignRoutes";
+import flowRoutes from "./flowRoutes";
 
 const routes = Router();
 
@@ -28,6 +34,12 @@ routes.use(queueRoutes);
 routes.use(quickAnswerRoutes);
 routes.use(scheduledMessageRoutes);
 routes.use(brandingRoutes);
+routes.use(integrationRoutes);
+routes.use(webhookRoutes);
+routes.use(chatgptRoutes);
+routes.use(evolutionRoutes);
+routes.use(campaignRoutes);
+routes.use(flowRoutes);
 routes.use("/api/messages", apiRoutes);
 
 export default routes;

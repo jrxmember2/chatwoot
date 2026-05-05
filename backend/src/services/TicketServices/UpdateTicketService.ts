@@ -5,6 +5,7 @@ import Ticket from "../../models/Ticket";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import ShowTicketService from "./ShowTicketService";
+import EmitIntegrationEventService from "../IntegrationServices/EmitIntegrationEventService";
 
 interface TicketData {
   status?: string;
@@ -74,6 +75,32 @@ const UpdateTicketService = async ({
       action: "update",
       ticket
     });
+
+  EmitIntegrationEventService({
+    event: "ticket_updated",
+    payload: {
+      id: ticket.id,
+      status: ticket.status,
+      oldStatus,
+      userId: ticket.userId,
+      oldUserId,
+      queueId: ticket.queueId,
+      whatsappId: ticket.whatsappId
+    }
+  });
+
+  if (oldStatus !== "closed" && ticket.status === "closed") {
+    EmitIntegrationEventService({
+      event: "ticket_closed",
+      payload: {
+        id: ticket.id,
+        contactId: ticket.contactId,
+        userId: ticket.userId,
+        queueId: ticket.queueId,
+        whatsappId: ticket.whatsappId
+      }
+    });
+  }
 
   return { ticket, oldStatus, oldUserId };
 };

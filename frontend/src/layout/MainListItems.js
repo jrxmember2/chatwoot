@@ -16,6 +16,9 @@ import ContactPhoneOutlinedIcon from "@material-ui/icons/ContactPhoneOutlined";
 import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
 import QuestionAnswerOutlinedIcon from "@material-ui/icons/QuestionAnswerOutlined";
 import ColorLensOutlinedIcon from "@material-ui/icons/ColorLensOutlined";
+import SendIcon from "@material-ui/icons/Send";
+import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import LinkIcon from "@material-ui/icons/Link";
 
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
@@ -99,6 +102,36 @@ const MainListItems = (props) => {
       />
       <Divider />
       <ListSubheader inset>
+        {i18n.t("mainDrawer.listItems.campaignsGroup")}
+      </ListSubheader>
+      <Can
+        role={user.profile}
+        perform="drawer-admin-items:view"
+        yes={() => (
+          <ListItemLink
+            to="/campaigns"
+            primary={i18n.t("campaigns.title")}
+            icon={<SendIcon />}
+          />
+        )}
+      />
+      <Divider />
+      <ListSubheader inset>
+        {i18n.t("mainDrawer.listItems.automationsGroup")}
+      </ListSubheader>
+      <Can
+        role={user.profile}
+        perform="drawer-admin-items:view"
+        yes={() => (
+          <ListItemLink
+            to="/flows"
+            primary={i18n.t("flowbuilder.title")}
+            icon={<DeviceHubIcon />}
+          />
+        )}
+      />
+      <Divider />
+      <ListSubheader inset>
         {i18n.t("mainDrawer.listItems.settingsGroup")}
       </ListSubheader>
       <ListItemLink
@@ -129,6 +162,16 @@ const MainListItems = (props) => {
               to="/branding"
               primary={i18n.t("branding.title")}
               icon={<ColorLensOutlinedIcon />}
+            />
+            <ListItemLink
+              to="/integrations"
+              primary={i18n.t("integrations.title")}
+              icon={<DeviceHubIcon />}
+            />
+            <ListItemLink
+              to="/webhooks"
+              primary={i18n.t("webhooks.title")}
+              icon={<LinkIcon />}
             />
             <ListItemLink
               to="/settings"

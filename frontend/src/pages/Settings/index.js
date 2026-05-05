@@ -145,6 +145,40 @@ const Settings = () => {
 						{i18n.t("branding.buttons.open")}
 					</Button>
 				</Paper>
+				<Paper className={classes.brandingPaper}>
+					<Typography variant="h6">
+						{i18n.t("integrations.title")}
+					</Typography>
+					<Typography variant="body2" color="textSecondary">
+						{i18n.t("integrations.description")}
+					</Typography>
+					<Button
+						component={RouterLink}
+						to="/integrations"
+						variant="contained"
+						color="primary"
+						className={classes.brandingAction}
+					>
+						{i18n.t("integrations.open")}
+					</Button>
+				</Paper>
+				<Paper className={classes.brandingPaper}>
+					<Typography variant="h6">
+						{i18n.t("webhooks.title")}
+					</Typography>
+					<Typography variant="body2" color="textSecondary">
+						{i18n.t("webhooks.description")}
+					</Typography>
+					<Button
+						component={RouterLink}
+						to="/webhooks"
+						variant="contained"
+						color="primary"
+						className={classes.brandingAction}
+					>
+						{i18n.t("webhooks.open")}
+					</Button>
+				</Paper>
 				<Paper className={classes.paper}>
 					<Typography variant="body1">
 						{i18n.t("settings.settings.userCreation.name")}

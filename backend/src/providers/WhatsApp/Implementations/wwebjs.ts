@@ -30,6 +30,7 @@ import {
   WhatsappContextPayload
 } from "../../../handlers/handleWhatsappEvents";
 import { maybeStartConfiguredOldMessagesImportInBackground } from "../../../services/WhatsappHistoryServices/ImportOldMessagesService";
+import EmitIntegrationEventService from "../../../services/IntegrationServices/EmitIntegrationEventService";
 
 export interface Session extends Client {
   id?: number;
@@ -507,6 +508,15 @@ const wbot: Session = new Client({
         retries: whatsapp.retries + 1
       });
 
+      EmitIntegrationEventService({
+        event: "whatsapp_disconnected",
+        payload: {
+          id: whatsapp.id,
+          name: whatsapp.name,
+          status: "DISCONNECTED"
+        }
+      });
+
       io.emit("whatsappSession", {
         action: "update",
         session: whatsapp
@@ -521,6 +531,15 @@ const wbot: Session = new Client({
           status: "CONNECTED",
           qrcode: "",
           retries: 0
+        });
+
+        EmitIntegrationEventService({
+          event: "whatsapp_connected",
+          payload: {
+            id: whatsapp.id,
+            name: whatsapp.name,
+            status: "CONNECTED"
+          }
         });
 
         io.emit("whatsappSession", {
@@ -560,6 +579,16 @@ const wbot: Session = new Client({
       logger.info(`Disconnected session: ${sessionName}, reason: ${reason}`);
       try {
         await whatsapp.update({ status: "OPENING", session: "" });
+
+        EmitIntegrationEventService({
+          event: "whatsapp_disconnected",
+          payload: {
+            id: whatsapp.id,
+            name: whatsapp.name,
+            status: "OPENING",
+            reason
+          }
+        });
 
         io.emit("whatsappSession", {
           action: "update",
