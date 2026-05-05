@@ -1,7 +1,10 @@
 import fs from "fs";
+import path from "path";
 import AppError from "../../errors/AppError";
 import Ticket from "../../models/Ticket";
 import { whatsappProvider, ProviderMessage } from "../../providers/WhatsApp";
+import uploadConfig from "../../config/upload";
+import CreateMessageService from "../MessageServices/CreateMessageService";
 
 import formatBody from "../../helpers/Mustache";
 
@@ -11,6 +14,25 @@ interface Request {
   body?: string;
   removeAfterSend?: boolean;
 }
+
+const normalizeMessageDate = (timestamp?: number): Date | undefined => {
+  if (!timestamp || !Number.isFinite(timestamp)) {
+    return undefined;
+  }
+
+  const timestampInMs = timestamp < 1e12 ? timestamp * 1000 : timestamp;
+  return new Date(timestampInMs);
+};
+
+const getStoredMediaUrl = (mediaPath: string): string | null => {
+  const relativePath = path.relative(uploadConfig.directory, mediaPath);
+
+  if (!relativePath || relativePath.startsWith("..")) {
+    return null;
+  }
+
+  return relativePath.replace(/\\/g, "/");
+};
 
 const SendWhatsAppMedia = async ({
   media,
@@ -54,7 +76,29 @@ const SendWhatsAppMedia = async ({
       lastMessage: body || media.originalname || media.filename
     });
 
-    if (removeAfterSend && fs.existsSync(media.path)) {
+    const messageDate = normalizeMessageDate(sentMessage.timestamp);
+    const storedMediaUrl = getStoredMediaUrl(media.path);
+
+    await CreateMessageService({
+      messageData: {
+        id: sentMessage.id,
+        ticketId: ticket.id,
+        body: hasBody || media.originalname || media.filename,
+        fromMe: true,
+        read: true,
+        mediaType: sentMessage.type,
+        mediaUrl: storedMediaUrl || undefined,
+        ack: sentMessage.ack ?? 1,
+        ...(messageDate
+          ? {
+              createdAt: messageDate,
+              updatedAt: messageDate
+            }
+          : {})
+      }
+    });
+
+    if (removeAfterSend && !storedMediaUrl && fs.existsSync(media.path)) {
       fs.unlinkSync(media.path);
     }
 
