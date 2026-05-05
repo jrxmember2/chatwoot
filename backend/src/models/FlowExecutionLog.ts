@@ -30,14 +30,14 @@ class FlowExecutionLog extends Model<FlowExecutionLog> {
   flow: Flow;
 
   @ForeignKey(() => Ticket)
-  @Column
+  @Column(DataType.INTEGER)
   ticketId: number | null;
 
   @BelongsTo(() => Ticket)
   ticket: Ticket;
 
   @ForeignKey(() => Contact)
-  @Column
+  @Column(DataType.INTEGER)
   contactId: number | null;
 
   @BelongsTo(() => Contact)
@@ -50,7 +50,7 @@ class FlowExecutionLog extends Model<FlowExecutionLog> {
   status: string;
 
   @ForeignKey(() => FlowNode)
-  @Column
+  @Column(DataType.INTEGER)
   currentNodeId: number | null;
 
   @BelongsTo(() => FlowNode, "currentNodeId")
