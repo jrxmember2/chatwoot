@@ -146,8 +146,17 @@ const init = async (whatsapp: Whatsapp): Promise<void> => {
   const previousStatus = whatsapp.status;
 
   try {
-    await ConfigureEvolutionWebhookService(whatsapp);
     const updatedWhatsapp = await SyncEvolutionStatusService(whatsapp.id);
+
+    try {
+      await ConfigureEvolutionWebhookService(updatedWhatsapp);
+    } catch (error) {
+      logger.warn(
+        { err: error, whatsappId: whatsapp.id },
+        "Nao foi possivel configurar o webhook da Evolution. O status da conexao sera mantido."
+      );
+    }
+
     emitSessionUpdate(updatedWhatsapp);
     emitConnectionIntegrationEvent(previousStatus, updatedWhatsapp);
   } catch (error) {
