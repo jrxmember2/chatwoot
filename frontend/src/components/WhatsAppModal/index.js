@@ -17,6 +17,10 @@ import {
 	Switch,
 	FormControlLabel,
 	Typography,
+	FormControl,
+	InputLabel,
+	Select,
+	MenuItem,
 } from "@material-ui/core";
 
 import api from "../../services/api";
@@ -56,11 +60,22 @@ const SessionSchema = Yup.object().shape({
 		.min(2, "Too Short!")
 		.max(50, "Too Long!")
 		.required("Required"),
+	provider: Yup.string()
+		.oneOf(["wwebjs", "whaileys", "evolution"])
+		.required("Required"),
+	evolutionInstanceName: Yup.string()
+		.nullable()
+		.when("provider", {
+			is: "evolution",
+			then: Yup.string().trim().required("connections.evolutionInstanceRequired"),
+			otherwise: Yup.string().nullable(),
+		}),
 	importOldMessages: Yup.boolean(),
 	importOldMessagesDays: Yup.number()
 		.nullable()
-		.when("importOldMessages", {
-			is: true,
+		.when(["provider", "importOldMessages"], {
+			is: (provider, importOldMessages) =>
+				provider !== "evolution" && importOldMessages,
 			then: Yup.number()
 				.typeError("connections.importOldMessagesValidationDays")
 				.required("connections.importOldMessagesValidationDays")
@@ -78,6 +93,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 		greetingMessage: "",
 		farewellMessage: "",
 		isDefault: false,
+		provider: "wwebjs",
+		evolutionInstanceName: "",
 		importOldMessages: false,
 		importOldMessagesDays: 20,
 	};
@@ -93,6 +110,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 				setWhatsApp({
 					...initialState,
 					...data,
+					provider: data.provider || "wwebjs",
+					evolutionInstanceName: data.evolutionInstanceName || "",
 					importOldMessagesDays: data.importOldMessagesDays || 20,
 				});
 
@@ -109,8 +128,19 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 		const whatsappData = {
 			...values,
 			queueIds: selectedQueueIds,
-			importOldMessages: Boolean(values.importOldMessages),
-			importOldMessagesDays: values.importOldMessages
+			provider: values.provider,
+			evolutionInstanceName:
+				values.provider === "evolution"
+					? values.evolutionInstanceName?.trim() || ""
+					: null,
+			importOldMessages:
+				values.provider === "evolution"
+					? false
+					: Boolean(values.importOldMessages),
+			importOldMessagesDays:
+				values.provider === "evolution"
+					? null
+					: values.importOldMessages
 				? Number(values.importOldMessagesDays)
 				: null,
 		};
@@ -186,20 +216,77 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										label={i18n.t("whatsappModal.form.default")}
 									/>
 								</div>
-								<div>
-									<FormControlLabel
-										control={
-											<Field
-												as={Switch}
-												color="primary"
-												name="importOldMessages"
-												checked={values.importOldMessages}
-											/>
-										}
-										label={i18n.t("connections.importOldMessages")}
-									/>
-								</div>
-								{values.importOldMessages && (
+								<FormControl
+									fullWidth
+									variant="outlined"
+									margin="dense"
+								>
+									<InputLabel>
+										{i18n.t("whatsappModal.form.provider")}
+									</InputLabel>
+									<Field
+										as={Select}
+										label={i18n.t("whatsappModal.form.provider")}
+										name="provider"
+									>
+										<MenuItem value="wwebjs">
+											{i18n.t("connections.providers.wwebjs")}
+										</MenuItem>
+										<MenuItem value="whaileys">
+											{i18n.t("connections.providers.whaileys")}
+										</MenuItem>
+										<MenuItem value="evolution">
+											{i18n.t("connections.providers.evolution")}
+										</MenuItem>
+									</Field>
+								</FormControl>
+								{values.provider === "evolution" && (
+									<>
+										<Field
+											as={TextField}
+											label={i18n.t(
+												"whatsappModal.form.evolutionInstanceName"
+											)}
+											name="evolutionInstanceName"
+											fullWidth
+											variant="outlined"
+											margin="dense"
+											error={
+												touched.evolutionInstanceName &&
+												Boolean(errors.evolutionInstanceName)
+											}
+											helperText={
+												touched.evolutionInstanceName &&
+												errors.evolutionInstanceName
+													? i18n.t(errors.evolutionInstanceName)
+													: i18n.t("whatsappModal.form.evolutionInfo")
+											}
+										/>
+										<Typography variant="body2" color="textSecondary">
+											{i18n.t("whatsappModal.form.evolutionInfo")}
+										</Typography>
+									</>
+								)}
+								{values.provider !== "evolution" ? (
+									<div>
+										<FormControlLabel
+											control={
+												<Field
+													as={Switch}
+													color="primary"
+													name="importOldMessages"
+													checked={values.importOldMessages}
+												/>
+											}
+											label={i18n.t("connections.importOldMessages")}
+										/>
+									</div>
+								) : (
+									<Typography variant="body2" color="textSecondary">
+										{i18n.t("connections.importNotAvailableEvolution")}
+									</Typography>
+								)}
+								{values.provider !== "evolution" && values.importOldMessages && (
 									<div>
 										<Field
 											as={TextField}
@@ -224,7 +311,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										/>
 									</div>
 								)}
-								{values.importOldMessages && (
+								{values.provider !== "evolution" && values.importOldMessages && (
 									<Typography variant="body2" color="textSecondary">
 										{i18n.t("connections.importOldMessagesHelp")}
 									</Typography>

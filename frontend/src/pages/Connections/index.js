@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { format, parseISO } from "date-fns";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { green, orange, red } from "@material-ui/core/colors";
 import {
 	Button,
 	TableBody,
@@ -25,10 +25,6 @@ import {
 import {
 	Edit,
 	CheckCircle,
-	SignalCellularConnectedNoInternet2Bar,
-	SignalCellularConnectedNoInternet0Bar,
-	SignalCellular4Bar,
-	CropFree,
 	DeleteOutline,
 } from "@material-ui/icons";
 
@@ -84,6 +80,61 @@ const useStyles = makeStyles(theme => ({
 	},
 	importActionButton: {
 		marginTop: theme.spacing(1),
+	},
+	connectionNameCell: {
+		display: "flex",
+		flexDirection: "column",
+		gap: theme.spacing(0.5),
+	},
+	providerMeta: {
+		fontSize: theme.typography.pxToRem(12),
+		color: theme.palette.text.secondary,
+	},
+	instanceMeta: {
+		fontSize: theme.typography.pxToRem(12),
+		color: theme.palette.text.secondary,
+	},
+	statusWrapper: {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		gap: theme.spacing(1),
+	},
+	statusText: {
+		fontWeight: 500,
+	},
+	trafficLight: {
+		width: 18,
+		minWidth: 18,
+		borderRadius: 12,
+		backgroundColor: theme.palette.type === "dark" ? "#2b2b2b" : "#1f1f1f",
+		padding: theme.spacing(0.5),
+		display: "flex",
+		flexDirection: "column",
+		alignItems: "center",
+		gap: 3,
+	},
+	trafficLightLamp: {
+		width: 8,
+		height: 8,
+		borderRadius: "50%",
+		backgroundColor: "#555",
+		opacity: 0.45,
+	},
+	trafficLightLampRed: {
+		backgroundColor: red[500],
+		opacity: 1,
+		boxShadow: `0 0 8px ${red[300]}`,
+	},
+	trafficLightLampYellow: {
+		backgroundColor: orange[500],
+		opacity: 1,
+		boxShadow: `0 0 8px ${orange[300]}`,
+	},
+	trafficLightLampGreen: {
+		backgroundColor: green[500],
+		opacity: 1,
+		boxShadow: `0 0 8px ${green[300]}`,
 	},
 }));
 
@@ -254,6 +305,10 @@ const Connections = () => {
 	};
 
 	const getImportStatusLabel = whatsApp => {
+		if (whatsApp.provider === "evolution") {
+			return i18n.t("connections.importNotAvailableEvolution");
+		}
+
 		const status = whatsApp.oldMessagesImportStatus || "idle";
 
 		if (status === "running") {
@@ -288,6 +343,16 @@ const Connections = () => {
 	};
 
 	const renderImportStatus = whatsApp => {
+		if (whatsApp.provider === "evolution") {
+			return (
+				<div className={classes.importStatusCell}>
+					<Typography variant="body2" color="textSecondary">
+						{i18n.t("connections.importNotAvailableEvolution")}
+					</Typography>
+				</div>
+			);
+		}
+
 		const isRunning = whatsApp.oldMessagesImportStatus === "running";
 		const canTriggerNow = whatsApp.status === "CONNECTED" && !isRunning;
 		const lastImportAt = whatsApp.lastOldMessagesImportAt
@@ -333,6 +398,35 @@ const Connections = () => {
 	};
 
 	const renderActionButtons = whatsApp => {
+		if (whatsApp.provider === "evolution") {
+			return (
+				<>
+					<Button
+						size="small"
+						variant="outlined"
+						color="primary"
+						onClick={() => handleStartWhatsAppSession(whatsApp.id)}
+					>
+						{whatsApp.status === "OPENING"
+							? i18n.t("connections.buttons.syncingStatus")
+							: i18n.t("connections.buttons.syncStatus")}
+					</Button>
+					{whatsApp.status === "CONNECTED" && (
+						<Button
+							size="small"
+							variant="outlined"
+							color="secondary"
+							onClick={() => {
+								handleOpenConfirmationModal("disconnect", whatsApp.id);
+							}}
+						>
+							{i18n.t("connections.buttons.disconnect")}
+						</Button>
+					)}
+				</>
+			);
+		}
+
 		return (
 			<>
 				{whatsApp.status === "qrcode" && (
@@ -389,41 +483,57 @@ const Connections = () => {
 	};
 
 	const renderStatusToolTips = whatsApp => {
+		const isConnected = whatsApp.status === "CONNECTED";
+		const isWarning =
+			whatsApp.status === "OPENING" ||
+			whatsApp.status === "qrcode" ||
+			whatsApp.status === "PAIRING" ||
+			whatsApp.status === "TIMEOUT";
+		const statusLabel = isConnected
+			? i18n.t("connections.statusLabels.connected")
+			: isWarning
+				? i18n.t("connections.statusLabels.syncing")
+				: i18n.t("connections.statusLabels.disconnected");
+		const providerLabel = i18n.t(
+			`connections.providers.${whatsApp.provider || "wwebjs"}`
+		);
+		const tooltipTitle = `${statusLabel} • ${providerLabel}`;
+		const tooltipContent =
+			whatsApp.provider === "evolution"
+				? i18n.t("connections.evolutionInfo")
+				: whatsApp.status === "DISCONNECTED"
+					? i18n.t("connections.toolTips.disconnected.content")
+					: whatsApp.status === "qrcode"
+						? i18n.t("connections.toolTips.qrcode.content")
+						: whatsApp.status === "TIMEOUT" || whatsApp.status === "PAIRING"
+							? i18n.t("connections.toolTips.timeout.content")
+							: "";
+
 		return (
-			<div className={classes.customTableCell}>
-				{whatsApp.status === "DISCONNECTED" && (
-					<CustomToolTip
-						title={i18n.t("connections.toolTips.disconnected.title")}
-						content={i18n.t("connections.toolTips.disconnected.content")}
-					>
-						<SignalCellularConnectedNoInternet0Bar color="secondary" />
-					</CustomToolTip>
-				)}
-				{whatsApp.status === "OPENING" && (
-					<CircularProgress size={24} className={classes.buttonProgress} />
-				)}
-				{whatsApp.status === "qrcode" && (
-					<CustomToolTip
-						title={i18n.t("connections.toolTips.qrcode.title")}
-						content={i18n.t("connections.toolTips.qrcode.content")}
-					>
-						<CropFree />
-					</CustomToolTip>
-				)}
-				{whatsApp.status === "CONNECTED" && (
-					<CustomToolTip title={i18n.t("connections.toolTips.connected.title")}>
-						<SignalCellular4Bar style={{ color: green[500] }} />
-					</CustomToolTip>
-				)}
-				{(whatsApp.status === "TIMEOUT" || whatsApp.status === "PAIRING") && (
-					<CustomToolTip
-						title={i18n.t("connections.toolTips.timeout.title")}
-						content={i18n.t("connections.toolTips.timeout.content")}
-					>
-						<SignalCellularConnectedNoInternet2Bar color="secondary" />
-					</CustomToolTip>
-				)}
-			</div>
+			<CustomToolTip title={tooltipTitle} content={tooltipContent}>
+				<div className={classes.statusWrapper}>
+					<div className={classes.trafficLight}>
+						<span
+							className={`${classes.trafficLightLamp} ${
+								!isConnected && !isWarning ? classes.trafficLightLampRed : ""
+							}`}
+						/>
+						<span
+							className={`${classes.trafficLightLamp} ${
+								isWarning ? classes.trafficLightLampYellow : ""
+							}`}
+						/>
+						<span
+							className={`${classes.trafficLightLamp} ${
+								isConnected ? classes.trafficLightLampGreen : ""
+							}`}
+						/>
+					</div>
+					<Typography variant="body2" className={classes.statusText}>
+						{statusLabel}
+					</Typography>
+				</div>
+			</CustomToolTip>
 		);
 	};
 
@@ -532,7 +642,34 @@ const Connections = () => {
 								{whatsApps?.length > 0 &&
 									whatsApps.map(whatsApp => (
 										<TableRow key={whatsApp.id}>
-											<TableCell align="center">{whatsApp.name}</TableCell>
+											<TableCell align="center">
+												<div className={classes.connectionNameCell}>
+													<Typography variant="body2">
+														{whatsApp.name}
+													</Typography>
+													<Typography
+														variant="caption"
+														className={classes.providerMeta}
+													>
+														{i18n.t("connections.provider")}:{" "}
+														{i18n.t(
+															`connections.providers.${
+																whatsApp.provider || "wwebjs"
+															}`
+														)}
+													</Typography>
+													{whatsApp.provider === "evolution" &&
+													whatsApp.evolutionInstanceName ? (
+														<Typography
+															variant="caption"
+															className={classes.instanceMeta}
+														>
+															{i18n.t("connections.evolutionInstance")}:{" "}
+															{whatsApp.evolutionInstanceName}
+														</Typography>
+													) : null}
+												</div>
+											</TableCell>
 											<TableCell align="center">
 												{renderStatusToolTips(whatsApp)}
 											</TableCell>

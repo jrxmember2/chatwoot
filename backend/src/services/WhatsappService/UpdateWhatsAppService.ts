@@ -14,6 +14,8 @@ interface WhatsappData {
   greetingMessage?: string;
   farewellMessage?: string;
   queueIds?: number[];
+  provider?: string;
+  evolutionInstanceName?: string | null;
   importOldMessages?: boolean;
   importOldMessagesDays?: number | null;
 }
@@ -35,7 +37,13 @@ const UpdateWhatsAppService = async ({
   const schema = Yup.object().shape({
     name: Yup.string().min(2),
     status: Yup.string(),
-    isDefault: Yup.boolean()
+    isDefault: Yup.boolean(),
+    provider: Yup.string().oneOf(["wwebjs", "whaileys", "evolution"]),
+    evolutionInstanceName: Yup.string().nullable().when("provider", {
+      is: "evolution",
+      then: Yup.string().trim().required("ERR_EVOLUTION_INSTANCE_REQUIRED"),
+      otherwise: Yup.string().nullable()
+    })
   });
 
   const {
@@ -46,12 +54,20 @@ const UpdateWhatsAppService = async ({
     greetingMessage,
     farewellMessage,
     queueIds = [],
+    provider,
+    evolutionInstanceName,
     importOldMessages,
     importOldMessagesDays
   } = whatsappData;
 
   try {
-    await schema.validate({ name, status, isDefault });
+    await schema.validate({
+      name,
+      status,
+      isDefault,
+      provider,
+      evolutionInstanceName
+    });
   } catch (err) {
     throw new AppError(err.message);
   }
@@ -72,12 +88,23 @@ const UpdateWhatsAppService = async ({
   }
 
   const whatsapp = await ShowWhatsAppService(whatsappId);
+  const normalizedProvider = provider || whatsapp.provider || "wwebjs";
+  const normalizedEvolutionInstanceName =
+    normalizedProvider === "evolution"
+      ? evolutionInstanceName?.trim() || whatsapp.evolutionInstanceName || null
+      : null;
   let nextImportOldMessagesStatus = whatsapp.oldMessagesImportStatus;
   let nextImportOldMessagesError = whatsapp.oldMessagesImportError;
   let nextImportOldMessagesDays = whatsapp.importOldMessagesDays;
+  let nextImportOldMessages = whatsapp.importOldMessages;
 
-  if (importOldMessages !== undefined) {
-    if (importOldMessages) {
+  if (importOldMessages !== undefined || normalizedProvider === "evolution") {
+    if (normalizedProvider === "evolution") {
+      nextImportOldMessages = false;
+      nextImportOldMessagesDays = null;
+      nextImportOldMessagesStatus = "idle";
+      nextImportOldMessagesError = null;
+    } else if (importOldMessages) {
       const normalizedDays = Number(importOldMessagesDays);
 
       if (
@@ -92,6 +119,7 @@ const UpdateWhatsAppService = async ({
         !whatsapp.importOldMessages ||
         whatsapp.importOldMessagesDays !== normalizedDays;
 
+      nextImportOldMessages = true;
       nextImportOldMessagesDays = normalizedDays;
 
       if (whatsapp.oldMessagesImportStatus !== "running" && shouldResetImportStatus) {
@@ -99,6 +127,7 @@ const UpdateWhatsAppService = async ({
         nextImportOldMessagesError = null;
       }
     } else {
+      nextImportOldMessages = false;
       nextImportOldMessagesDays = null;
       nextImportOldMessagesStatus = "idle";
       nextImportOldMessagesError = null;
@@ -112,7 +141,9 @@ const UpdateWhatsAppService = async ({
     greetingMessage,
     farewellMessage,
     isDefault,
-    importOldMessages,
+    provider: normalizedProvider,
+    evolutionInstanceName: normalizedEvolutionInstanceName,
+    importOldMessages: nextImportOldMessages,
     importOldMessagesDays: nextImportOldMessagesDays,
     oldMessagesImportStatus: nextImportOldMessagesStatus,
     oldMessagesImportError: nextImportOldMessagesError

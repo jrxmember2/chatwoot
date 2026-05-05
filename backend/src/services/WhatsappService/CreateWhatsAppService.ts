@@ -11,6 +11,8 @@ interface Request {
   farewellMessage?: string;
   status?: string;
   isDefault?: boolean;
+  provider?: string;
+  evolutionInstanceName?: string | null;
   importOldMessages?: boolean;
   importOldMessagesDays?: number | null;
 }
@@ -27,6 +29,8 @@ const CreateWhatsAppService = async ({
   greetingMessage,
   farewellMessage,
   isDefault = false,
+  provider = process.env.WHATSAPP_PROVIDER || "wwebjs",
+  evolutionInstanceName = null,
   importOldMessages = false,
   importOldMessagesDays = null
 }: Request): Promise<Response> => {
@@ -46,6 +50,14 @@ const CreateWhatsAppService = async ({
         }
       ),
     isDefault: Yup.boolean().required(),
+    provider: Yup.string()
+      .oneOf(["wwebjs", "whaileys", "evolution"])
+      .required(),
+    evolutionInstanceName: Yup.string().nullable().when("provider", {
+      is: "evolution",
+      then: Yup.string().trim().required("ERR_EVOLUTION_INSTANCE_REQUIRED"),
+      otherwise: Yup.string().nullable()
+    }),
     importOldMessages: Yup.boolean().required(),
     importOldMessagesDays: Yup.number()
       .nullable()
@@ -61,6 +73,8 @@ const CreateWhatsAppService = async ({
       name,
       status,
       isDefault,
+      provider,
+      evolutionInstanceName,
       importOldMessages,
       importOldMessagesDays
     });
@@ -87,16 +101,26 @@ const CreateWhatsAppService = async ({
     throw new AppError("ERR_WAPP_GREETING_REQUIRED");
   }
 
+  const normalizedProvider = provider || "wwebjs";
+  const normalizedEvolutionInstanceName =
+    normalizedProvider === "evolution" ? evolutionInstanceName?.trim() || null : null;
+  const shouldImportOldMessages =
+    normalizedProvider === "evolution" ? false : importOldMessages;
+  const normalizedStatus =
+    normalizedProvider === "evolution" ? "DISCONNECTED" : status;
+
   const whatsapp = await Whatsapp.create(
     {
       name,
-      status,
+      status: normalizedStatus,
       greetingMessage,
       farewellMessage,
       isDefault,
-      importOldMessages,
-      importOldMessagesDays: importOldMessages ? importOldMessagesDays : null,
-      oldMessagesImportStatus: importOldMessages ? "pending" : "idle",
+      provider: normalizedProvider,
+      evolutionInstanceName: normalizedEvolutionInstanceName,
+      importOldMessages: shouldImportOldMessages,
+      importOldMessagesDays: shouldImportOldMessages ? importOldMessagesDays : null,
+      oldMessagesImportStatus: shouldImportOldMessages ? "pending" : "idle",
       oldMessagesImportError: null
     },
     { include: ["queues"] }

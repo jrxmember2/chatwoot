@@ -17,6 +17,8 @@ interface WhatsappData {
   farewellMessage?: string;
   status?: string;
   isDefault?: boolean;
+  provider?: string;
+  evolutionInstanceName?: string | null;
   importOldMessages?: boolean;
   importOldMessagesDays?: number | null;
 }
@@ -35,6 +37,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     greetingMessage,
     farewellMessage,
     queueIds,
+    provider,
+    evolutionInstanceName,
     importOldMessages,
     importOldMessagesDays
   }: WhatsappData = req.body;
@@ -46,6 +50,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     greetingMessage,
     farewellMessage,
     queueIds,
+    provider,
+    evolutionInstanceName,
     importOldMessages,
     importOldMessagesDays
   });
@@ -82,11 +88,24 @@ export const update = async (
 ): Promise<Response> => {
   const { whatsappId } = req.params;
   const whatsappData = req.body;
+  const previousWhatsApp = await ShowWhatsAppService(whatsappId);
 
   const { whatsapp, oldDefaultWhatsapp } = await UpdateWhatsAppService({
     whatsappData,
     whatsappId
   });
+
+  const shouldRestartProviderSession =
+    previousWhatsApp.provider !== whatsapp.provider ||
+    (whatsapp.provider === "evolution" &&
+      previousWhatsApp.evolutionInstanceName !== whatsapp.evolutionInstanceName);
+
+  if (shouldRestartProviderSession) {
+    whatsappProvider.removeSession(whatsapp.id);
+    StartWhatsAppSession(whatsapp);
+  } else if (whatsapp.provider === "evolution") {
+    StartWhatsAppSession(whatsapp);
+  }
 
   if (
     whatsapp.status === "CONNECTED" &&

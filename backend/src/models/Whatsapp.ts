@@ -68,6 +68,9 @@ class Whatsapp extends Model<Whatsapp> {
   @Column(DataType.STRING)
   evolutionInstanceName: string | null;
 
+  @Column(DataType.STRING)
+  evolutionWebhookToken: string | null;
+
   @Default(false)
   @Column
   importOldMessages: boolean;

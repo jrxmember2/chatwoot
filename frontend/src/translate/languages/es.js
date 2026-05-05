@@ -571,6 +571,31 @@ messages.es.translations.connections.importOldMessagesStarted =
   "La sincronizacion de mensajes antiguos fue iniciada con exito.";
 messages.es.translations.connections.importOldMessagesAlreadyRunning =
   "Ya existe una sincronizacion en curso para esta conexion.";
+messages.es.translations.connections.provider = "Proveedor";
+messages.es.translations.connections.evolutionInstance = "Instancia Evolution";
+messages.es.translations.connections.evolutionInfo =
+  "Esta conexion usa una instancia existente de Evolution API y no muestra un QR Code local.";
+messages.es.translations.connections.evolutionInstanceRequired =
+  "Informa el nombre de la instancia registrada en Evolution API.";
+messages.es.translations.connections.importNotAvailableEvolution =
+  "La importacion de historial antiguo no esta disponible para conexiones Evolution API.";
+messages.es.translations.connections.providers = {
+  wwebjs: "WhatsApp Web (QR Code)",
+  whaileys: "Whaileys",
+  evolution: "Evolution API"
+};
+messages.es.translations.connections.statusLabels = {
+  connected: "Online",
+  syncing: "Sincronizando",
+  disconnected: "Offline"
+};
+messages.es.translations.connections.buttons.syncStatus = "Sincronizar";
+messages.es.translations.connections.buttons.syncingStatus = "Sincronizando";
+messages.es.translations.whatsappModal.form.provider = "Proveedor de la conexion";
+messages.es.translations.whatsappModal.form.evolutionInstanceName =
+  "Nombre de la instancia en Evolution";
+messages.es.translations.whatsappModal.form.evolutionInfo =
+  "Al usar Evolution API, WhaTicket no genera un QR Code en esta pantalla. La conexion pasara a usar la instancia informada en Evolution.";
 messages.es.translations.mainDrawer.listItems.attendance = "Atencion";
 messages.es.translations.mainDrawer.listItems.settingsGroup =
   "Configuracion";
@@ -771,6 +796,14 @@ messages.es.translations.backendErrors.ERR_EVOLUTION_INVALID_URL =
   "Ingresa una URL valida para Evolution API.";
 messages.es.translations.backendErrors.ERR_EVOLUTION_TEST_FAILED =
   "No se pudo validar la conexion con Evolution API.";
+messages.es.translations.backendErrors.ERR_EVOLUTION_NOT_CONFIGURED =
+  "Configura la URL, API Key e instancia de Evolution API antes de usar este proveedor.";
+messages.es.translations.backendErrors.ERR_EVOLUTION_INSTANCE_REQUIRED =
+  "Ingresa el nombre de la instancia de Evolution API para esta conexion.";
+messages.es.translations.backendErrors.ERR_EVOLUTION_WEBHOOK_UNAUTHORIZED =
+  "El webhook de Evolution API fue rechazado por token invalido.";
+messages.es.translations.backendErrors.ERR_EVOLUTION_BACKEND_URL_NOT_CONFIGURED =
+  "La URL publica del backend no esta configurada para registrar el webhook de Evolution.";
 messages.es.translations.backendErrors.ERR_INVALID_CAMPAIGN_MEDIA_TYPE =
   "Adjunta solo imagenes, PDF, audio, video o documentos comunes en la campana.";
 messages.es.translations.backendErrors.ERR_CAMPAIGN_NAME_REQUIRED =

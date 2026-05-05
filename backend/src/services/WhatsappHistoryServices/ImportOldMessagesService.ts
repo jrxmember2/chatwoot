@@ -236,11 +236,12 @@ const ImportOldMessagesService = async ({
   whatsappId,
   days
 }: StartImportRequest): Promise<void> => {
-  if ((process.env.WHATSAPP_PROVIDER || "wwebjs") !== "wwebjs") {
+  const whatsapp = await ShowWhatsAppService(whatsappId);
+
+  if (whatsapp.provider !== "wwebjs") {
     throw new AppError("ERR_OLD_MESSAGES_IMPORT_UNSUPPORTED", 400);
   }
 
-  const whatsapp = await ShowWhatsAppService(whatsappId);
   const importDays = getConfiguredDays(whatsapp, days);
   const sinceDate = new Date(Date.now() - importDays * 24 * 60 * 60 * 1000);
   const wbot = getWwebjsSession(whatsappId);
