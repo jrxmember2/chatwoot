@@ -6,6 +6,7 @@ import {
   WhatsappContextPayload
 } from "../../handlers/handleWhatsappEvents";
 import { MessageType } from "../../providers/WhatsApp";
+import GetEvolutionMediaPayloadService from "./GetEvolutionMediaPayloadService";
 
 const supportedTypes = new Set([
   "chat",
@@ -184,6 +185,10 @@ const hasMedia = (messageType: MessageType): boolean => {
   );
 };
 
+const isEvolutionMediaPlaceholder = (body: string): boolean => {
+  return /^\[Midia recebida via Evolution: .+\]$/i.test((body || "").trim());
+};
+
 const buildMessagePayload = (eventPayload: any): MessagePayload | null => {
   const remoteJid =
     eventPayload?.key?.remoteJid ||
@@ -252,8 +257,20 @@ const buildContactPayload = (eventPayload: any): ContactPayload | null => {
   };
 };
 
-const buildMediaPayload = (_eventPayload: any): MediaPayload | undefined => {
-  return undefined;
+const buildMediaPayload = async (
+  whatsappId: number,
+  eventPayload: any,
+  messageType: MessageType
+): Promise<MediaPayload | undefined> => {
+  if (!hasMedia(messageType)) {
+    return undefined;
+  }
+
+  return GetEvolutionMediaPayloadService({
+    whatsappId,
+    eventPayload,
+    messageType
+  });
 };
 
 interface Request {
@@ -282,7 +299,15 @@ const HandleEvolutionMessagesWebhookService = async ({
       unreadMessages: messagePayload.fromMe ? 0 : 1
     };
 
-    const mediaPayload = buildMediaPayload(item);
+    const mediaPayload = await buildMediaPayload(
+      whatsappId,
+      item,
+      messagePayload.type
+    );
+
+    if (mediaPayload && isEvolutionMediaPlaceholder(messagePayload.body)) {
+      messagePayload.body = "";
+    }
 
     await handleMessage(
       messagePayload,

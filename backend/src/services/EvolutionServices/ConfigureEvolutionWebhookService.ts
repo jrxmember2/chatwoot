@@ -26,14 +26,14 @@ const ConfigureEvolutionWebhookService = async (
       enabled: true,
       url: webhookUrl,
       webhook_by_events: true,
-      webhook_base64: false,
+      webhook_base64: true,
       events: WEBHOOK_EVENTS
     },
     {
       enabled: true,
       url: webhookUrl,
       webhookByEvents: true,
-      webhookBase64: false,
+      webhookBase64: true,
       events: WEBHOOK_EVENTS
     },
     {
@@ -41,7 +41,7 @@ const ConfigureEvolutionWebhookService = async (
         enabled: true,
         url: webhookUrl,
         byEvents: true,
-        base64: false,
+        base64: true,
         events: WEBHOOK_EVENTS
       }
     },
@@ -50,7 +50,7 @@ const ConfigureEvolutionWebhookService = async (
         enabled: true,
         url: webhookUrl,
         webhookByEvents: true,
-        webhookBase64: false,
+        webhookBase64: true,
         events: WEBHOOK_EVENTS
       }
     }
