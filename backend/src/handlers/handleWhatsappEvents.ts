@@ -355,7 +355,13 @@ export const handleMessageAck = async (
       return;
     }
 
-    await messageToUpdate.update({ ack });
+    const nextAck = Math.max(messageToUpdate.ack || 0, ack) as MessageAck;
+
+    if (nextAck === messageToUpdate.ack) {
+      return;
+    }
+
+    await messageToUpdate.update({ ack: nextAck });
 
     io.to(messageToUpdate.ticketId.toString()).emit("appMessage", {
       action: "update",

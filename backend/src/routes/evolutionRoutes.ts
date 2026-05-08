@@ -11,6 +11,11 @@ evolutionRoutes.post(
 );
 
 evolutionRoutes.post(
+  "/evolution/webhook/:whatsappId/:token/:event",
+  EvolutionWebhookController.receive
+);
+
+evolutionRoutes.post(
   "/evolution/webhook/:whatsappId/:token/messages-upsert",
   EvolutionWebhookController.messagesUpsert
 );

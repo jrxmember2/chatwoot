@@ -4,7 +4,12 @@ import EnsureEvolutionWebhookTokenService from "./EnsureEvolutionWebhookTokenSer
 import EvolutionRequestService from "./EvolutionRequestService";
 import GetEvolutionConnectionConfigService from "./GetEvolutionConnectionConfigService";
 
-const WEBHOOK_EVENTS = ["MESSAGES_UPSERT", "CONNECTION_UPDATE"];
+const WEBHOOK_EVENTS = [
+  "MESSAGES_UPSERT",
+  "MESSAGES_UPDATE",
+  "SEND_MESSAGE",
+  "CONNECTION_UPDATE"
+];
 
 const ConfigureEvolutionWebhookService = async (
   whatsapp: Whatsapp

@@ -3,6 +3,7 @@ import AppError from "../errors/AppError";
 import Whatsapp from "../models/Whatsapp";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import HandleEvolutionMessagesWebhookService from "../services/EvolutionServices/HandleEvolutionMessagesWebhookService";
+import HandleEvolutionMessageAckService from "../services/EvolutionServices/HandleEvolutionMessageAckService";
 import SyncEvolutionStatusService, {
   applyEvolutionStateToWhatsapp
 } from "../services/EvolutionServices/SyncEvolutionStatusService";
@@ -91,10 +92,27 @@ const isMessagePayload = (payload: any): boolean => {
   );
 };
 
+const isAckPayload = (payload: any): boolean => {
+  return Boolean(
+    payload?.update?.status ||
+      payload?.data?.update?.status ||
+      payload?.status ||
+      payload?.data?.status ||
+      payload?.messageStatus ||
+      payload?.statusMessage ||
+      payload?.ack ||
+      payload?.userReceipt ||
+      payload?.receipt ||
+      payload?.receipts
+  );
+};
+
 const detectWebhookType = (
-  payload: any
-): "messages" | "connection" | null => {
+  payload: any,
+  routeEvent?: string
+): "messages_upsert" | "message_ack" | "connection" | null => {
   const normalizedEvent = (
+    routeEvent ||
     payload?.event ||
     payload?.type ||
     payload?.data?.event ||
@@ -107,16 +125,27 @@ const detectWebhookType = (
     .toLowerCase()
     .replace(/[.\-\s]+/g, "_");
 
-  if (normalizedEvent.includes("message")) {
-    return "messages";
+  if (
+    normalizedEvent.includes("messages_update") ||
+    normalizedEvent.includes("send_message")
+  ) {
+    return "message_ack";
+  }
+
+  if (normalizedEvent.includes("messages_upsert")) {
+    return "messages_upsert";
   }
 
   if (normalizedEvent.includes("connection")) {
     return "connection";
   }
 
+  if (isAckPayload(payload) && isMessagePayload(payload)) {
+    return "message_ack";
+  }
+
   if (isMessagePayload(payload)) {
-    return "messages";
+    return "messages_upsert";
   }
 
   if (extractState(payload)) {
@@ -161,16 +190,34 @@ const processConnectionUpdate = async (
   };
 };
 
+const processMessageAck = async (
+  payload: any
+): Promise<{ received: true; processedCount: number }> => {
+  const { processedCount } = await HandleEvolutionMessageAckService({
+    payload
+  });
+
+  return {
+    received: true,
+    processedCount
+  };
+};
+
 export const receive = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
   const { whatsappId, token } = req.params;
   const whatsapp = await loadWebhookWhatsapp(whatsappId, token);
-  const webhookType = detectWebhookType(req.body);
+  const webhookType = detectWebhookType(req.body, req.params.event);
 
-  if (webhookType === "messages") {
+  if (webhookType === "messages_upsert") {
     const result = await processMessagesUpsert(whatsapp, req.body);
+    return res.status(200).json(result);
+  }
+
+  if (webhookType === "message_ack") {
+    const result = await processMessageAck(req.body);
     return res.status(200).json(result);
   }
 
