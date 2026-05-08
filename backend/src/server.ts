@@ -6,6 +6,7 @@ import { initRedis } from "./libs/redisStore";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import { startScheduledMessagesJob } from "./jobs/scheduledMessagesJob";
 import { startCampaignsJob } from "./jobs/campaignsJob";
+import { startEvolutionMessageAcksJob } from "./jobs/evolutionMessageAcksJob";
 
 const server = app.listen(process.env.PORT, () => {
   logger.info(`Server started on port: ${process.env.PORT}`);
@@ -16,6 +17,7 @@ initRedis();
 StartAllWhatsAppsSessions();
 startScheduledMessagesJob();
 startCampaignsJob();
+startEvolutionMessageAcksJob();
 gracefulShutdown(server);
 
 process.on("uncaughtException", err => {

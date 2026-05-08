@@ -8,6 +8,7 @@ import SyncEvolutionStatusService, {
   applyEvolutionStateToWhatsapp
 } from "../services/EvolutionServices/SyncEvolutionStatusService";
 import { getIO } from "../libs/socket";
+import { logger } from "../utils/logger";
 import EmitIntegrationEventService from "../services/IntegrationServices/EmitIntegrationEventService";
 
 const loadWebhookWhatsapp = async (
@@ -191,11 +192,23 @@ const processConnectionUpdate = async (
 };
 
 const processMessageAck = async (
-  payload: any
+  payload: any,
+  routeEvent?: string
 ): Promise<{ received: true; processedCount: number }> => {
   const { processedCount } = await HandleEvolutionMessageAckService({
     payload
   });
+
+  if (processedCount === 0) {
+    logger.warn(
+      {
+        routeEvent,
+        payloadKeys: Object.keys(payload || {}),
+        nestedKeys: Object.keys(payload?.data || {})
+      },
+      "Webhook de ack da Evolution recebido sem encontrar atualizacoes de status aproveitaveis."
+    );
+  }
 
   return {
     received: true,
@@ -217,7 +230,7 @@ export const receive = async (
   }
 
   if (webhookType === "message_ack") {
-    const result = await processMessageAck(req.body);
+    const result = await processMessageAck(req.body, req.params.event);
     return res.status(200).json(result);
   }
 

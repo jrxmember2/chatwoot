@@ -14,6 +14,7 @@ import {
 import { WhatsappProvider } from "../whatsappProvider";
 import ShowWhatsAppService from "../../../services/WhatsappService/ShowWhatsAppService";
 import ConfigureEvolutionWebhookService from "../../../services/EvolutionServices/ConfigureEvolutionWebhookService";
+import ConfigureEvolutionSettingsService from "../../../services/EvolutionServices/ConfigureEvolutionSettingsService";
 import EvolutionRequestService from "../../../services/EvolutionServices/EvolutionRequestService";
 import SyncEvolutionStatusService, {
   applyEvolutionStateToWhatsapp
@@ -147,6 +148,8 @@ const init = async (whatsapp: Whatsapp): Promise<void> => {
 
   try {
     const updatedWhatsapp = await SyncEvolutionStatusService(whatsapp.id);
+
+    await ConfigureEvolutionSettingsService(updatedWhatsapp);
 
     try {
       await ConfigureEvolutionWebhookService(updatedWhatsapp);

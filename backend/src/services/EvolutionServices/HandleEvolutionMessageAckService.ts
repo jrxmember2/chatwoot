@@ -1,5 +1,7 @@
 import { handleMessageAck } from "../../handlers/handleWhatsappEvents";
-import { MessageAck } from "../../providers/WhatsApp";
+import {
+  getAckValueFromEvolutionItem
+} from "./resolveEvolutionMessageAck";
 
 interface Request {
   payload: any;
@@ -47,110 +49,6 @@ const getMessageId = (item: any): string | undefined => {
   );
 };
 
-const getNumericAck = (value: any): MessageAck | null => {
-  const numericValue = Number(value);
-
-  if (!Number.isInteger(numericValue) || numericValue < 0 || numericValue > 4) {
-    return null;
-  }
-
-  return numericValue as MessageAck;
-};
-
-const getAckFromReceipts = (item: any): MessageAck | null => {
-  const receipts = Array.isArray(item?.userReceipt)
-    ? item.userReceipt
-    : Array.isArray(item?.receipt)
-      ? item.receipt
-      : Array.isArray(item?.receipts)
-        ? item.receipts
-        : [];
-
-  if (receipts.some((receipt: any) => receipt?.playedTimestamp)) {
-    return 4;
-  }
-
-  if (receipts.some((receipt: any) => receipt?.readTimestamp)) {
-    return 3;
-  }
-
-  if (
-    receipts.some(
-      (receipt: any) =>
-        receipt?.receiptTimestamp ||
-        receipt?.deliveryTimestamp ||
-        receipt?.deliveredTimestamp
-    )
-  ) {
-    return 2;
-  }
-
-  return null;
-};
-
-const getAckFromStatus = (value: any): MessageAck | null => {
-  const numericAck = getNumericAck(value);
-
-  if (numericAck !== null) {
-    return numericAck;
-  }
-
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const normalizedStatus = value.trim().toUpperCase();
-
-  if (!normalizedStatus) {
-    return null;
-  }
-
-  if (["PENDING", "SERVER_ACK", "SENT"].includes(normalizedStatus)) {
-    return 1;
-  }
-
-  if (
-    ["DELIVERY_ACK", "DELIVERED", "DEVICE_ACK", "RECEIVED"].includes(
-      normalizedStatus
-    )
-  ) {
-    return 2;
-  }
-
-  if (["READ", "READ_ACK", "SEEN"].includes(normalizedStatus)) {
-    return 3;
-  }
-
-  if (["PLAYED", "PLAYED_ACK"].includes(normalizedStatus)) {
-    return 4;
-  }
-
-  return null;
-};
-
-const getAckValue = (item: any): MessageAck | null => {
-  const statusCandidates = [
-    item?.update?.status,
-    item?.status,
-    item?.message?.status,
-    item?.data?.status,
-    item?.data?.update?.status,
-    item?.messageStatus,
-    item?.statusMessage,
-    item?.ack
-  ];
-
-  for (const candidate of statusCandidates) {
-    const ack = getAckFromStatus(candidate);
-
-    if (ack !== null) {
-      return ack;
-    }
-  }
-
-  return getAckFromReceipts(item);
-};
-
 const HandleEvolutionMessageAckService = async ({
   payload
 }: Request): Promise<Response> => {
@@ -160,7 +58,7 @@ const HandleEvolutionMessageAckService = async ({
   /* eslint-disable no-await-in-loop */
   for (const item of items) {
     const messageId = getMessageId(item);
-    const ack = getAckValue(item);
+    const ack = getAckValueFromEvolutionItem(item);
 
     if (!messageId || ack === null) {
       continue;
